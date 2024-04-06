@@ -22,7 +22,7 @@ git config --global http.sslverify false
 
 git config --global https.sslverify false
 
-git clone -b main  https://github.com/whfweb/openwrt.git
+git clone -b master  https://github.com/whfweb/openwrt.git
    
 cd openwrt
    
