@@ -39,7 +39,7 @@ IMG_PREFIX_EXTRA:=$(if $(EXTRA_IMAGE_NAME),$(call sanitize,$(EXTRA_IMAGE_NAME))-
 IMG_PREFIX_VERNUM:=$(if $(CONFIG_VERSION_FILENAMES),$(call sanitize,$(VERSION_NUMBER))-)
 IMG_PREFIX_VERCODE:=$(if $(CONFIG_VERSION_CODE_FILENAMES),$(call sanitize,$(VERSION_CODE))-)
 
-IMG_PREFIX:=$(VERSION_DIST_SANITIZED)-$(IMG_PREFIX_VERNUM)$(IMG_PREFIX_VERCODE)$(IMG_PREFIX_EXTRA)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET))
+IMG_PREFIX:=$(VERSION_DIST_SANITIZED)-$(IMG_PREFIX_VERNUM)$(IMG_PREFIX_VERCODE)$(IMG_PREFIX_EXTRA)$(BOARD)-$(SUBTARGET)
 IMG_ROOTFS:=$(IMG_PREFIX)-rootfs
 IMG_COMBINED:=$(IMG_PREFIX)-combined
 ifeq ($(DUMP),)
@@ -185,6 +185,7 @@ define Image/BuildDTB/sub
 		-I$(DTS_DIR) \
 		-I$(DTS_DIR)/include \
 		-I$(LINUX_DIR)/include/ \
+		-I$(LINUX_DIR)/scripts/dtc/include-prefixes \
 		-undef -D__DTS__ $(3) \
 		-o $(2).tmp $(1)
 	$(LINUX_DIR)/scripts/dtc/dtc -O dtb \
@@ -279,12 +280,11 @@ endef
 define Image/Manifest
 	$(call opkg,$(TARGET_DIR_ORIG)) list-installed > \
 		$(BIN_DIR)/$(IMG_PREFIX)$(if $(PROFILE_SANITIZED),-$(PROFILE_SANITIZED)).manifest
-ifndef IB
-	$(if $(CONFIG_JSON_CYCLONEDX_SBOM), \
-		$(SCRIPT_DIR)/package-metadata.pl imgcyclonedxsbom \
-		$(TMP_DIR)/.packageinfo \
+ifneq ($(CONFIG_JSON_CYCLONEDX_SBOM),)
+	$(SCRIPT_DIR)/package-metadata.pl imgcyclonedxsbom \
+		$(if $(IB),$(TOPDIR)/.packageinfo, $(TMP_DIR)/.packageinfo) \
 		$(BIN_DIR)/$(IMG_PREFIX)$(if $(PROFILE_SANITIZED),-$(PROFILE_SANITIZED)).manifest > \
-		$(BIN_DIR)/$(IMG_PREFIX)$(if $(PROFILE_SANITIZED),-$(PROFILE_SANITIZED)).bom.cdx.json)
+		$(BIN_DIR)/$(IMG_PREFIX)$(if $(PROFILE_SANITIZED),-$(PROFILE_SANITIZED)).bom.cdx.json
 endif
 endef
 
@@ -477,10 +477,10 @@ endef
 ifdef IB
   DEVICE_CHECK_PROFILE = $(filter $(1),DEVICE_$(PROFILE) $(PROFILE))
 else
-  DEVICE_CHECK_PROFILE = $(CONFIG_TARGET_$(if $(CONFIG_TARGET_MULTI_PROFILE),DEVICE_)$(call target_conf,$(BOARD)$(if $(SUBTARGET),_$(SUBTARGET)))_$(1))
+  DEVICE_CHECK_PROFILE = $(CONFIG_TARGET_$(if $(CONFIG_TARGET_MULTI_PROFILE),DEVICE_)$(call target_conf,$(BOARD)_$(SUBTARGET))_$(1))
 endif
 
-DEVICE_EXTRA_PACKAGES = $(call qstrip,$(CONFIG_TARGET_DEVICE_PACKAGES_$(call target_conf,$(BOARD)$(if $(SUBTARGET),_$(SUBTARGET)))_DEVICE_$(1)))
+DEVICE_EXTRA_PACKAGES = $(call qstrip,$(CONFIG_TARGET_DEVICE_PACKAGES_$(call target_conf,$(BOARD)_$(SUBTARGET))_DEVICE_$(1)))
 
 define merge_packages
   $(1) :=
@@ -558,7 +558,7 @@ define Device/Build/initramfs
 	DEVICE_TITLE="$$(DEVICE_TITLE)" \
 	DEVICE_PACKAGES="$$(DEVICE_PACKAGES)" \
 	TARGET="$(BOARD)" \
-	SUBTARGET="$(if $(SUBTARGET),$(SUBTARGET),generic)" \
+	SUBTARGET="$(SUBTARGET)" \
 	VERSION_NUMBER="$(VERSION_NUMBER)" \
 	VERSION_CODE="$(VERSION_CODE)" \
 	SUPPORTED_DEVICES="$$(SUPPORTED_DEVICES)" \
@@ -692,7 +692,7 @@ define Device/Build/image
 	DEVICE_TITLE="$(DEVICE_TITLE)" \
 	DEVICE_PACKAGES="$(DEVICE_PACKAGES)" \
 	TARGET="$(BOARD)" \
-	SUBTARGET="$(if $(SUBTARGET),$(SUBTARGET),generic)" \
+	SUBTARGET="$(SUBTARGET)" \
 	VERSION_NUMBER="$(VERSION_NUMBER)" \
 	VERSION_CODE="$(VERSION_CODE)" \
 	SUPPORTED_DEVICES="$(SUPPORTED_DEVICES)" \
@@ -746,7 +746,7 @@ define Device/Build/artifact
 	DEVICE_TITLE="$(DEVICE_TITLE)" \
 	DEVICE_PACKAGES="$(DEVICE_PACKAGES)" \
 	TARGET="$(BOARD)" \
-	SUBTARGET="$(if $(SUBTARGET),$(SUBTARGET),generic)" \
+	SUBTARGET="$(SUBTARGET)" \
 	VERSION_NUMBER="$(VERSION_NUMBER)" \
 	VERSION_CODE="$(VERSION_CODE)" \
 	SUPPORTED_DEVICES="$(SUPPORTED_DEVICES)" \

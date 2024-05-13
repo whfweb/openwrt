@@ -32,6 +32,30 @@ xor() {
 	printf "%0${retlen}x" "$ret"
 }
 
+data_2bin() {
+	local data=$1
+	local len=${#1}
+	local bin_data
+
+	for i in $(seq 0 2 $(($len - 1))); do
+		bin_data="${bin_data}\x${data:i:2}"
+	done
+
+	echo -ne $bin_data
+}
+
+data_2xor_val() {
+	local data=$1
+	local len=${#1}
+	local xor_data
+
+	for i in $(seq 0 4 $(($len - 1))); do
+		xor_data="${xor_data}${data:i:4} "
+	done
+
+	echo -n ${xor_data:0:-1}
+}
+
 append() {
 	local var="$1"
 	local value="$2"
@@ -384,7 +408,7 @@ group_add_next() {
 		return
 	fi
 	gids=$(cut -d: -f3 ${IPKG_INSTROOT}/etc/group)
-	gid=65536
+	gid=32768
 	while echo "$gids" | grep -q "^$gid$"; do
 		gid=$((gid + 1))
 	done
@@ -415,7 +439,7 @@ user_add() {
 	local rc
 	[ -z "$uid" ] && {
 		uids=$(cut -d: -f3 ${IPKG_INSTROOT}/etc/passwd)
-		uid=65536
+		uid=32768
 		while echo "$uids" | grep -q "^$uid$"; do
 			uid=$((uid + 1))
 		done
