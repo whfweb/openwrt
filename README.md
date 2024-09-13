@@ -25,6 +25,8 @@ git config --global https.sslverify false
 git clone -b master  https://github.com/whfweb/openwrt.git
    
 cd openwrt
+
+（ 将对 ./openwrt 目录及其所有子目录中的文件添加读、写、执行权限：sudo chmod 777 -R ./test）
    
    ./scripts/feeds update -a
    
