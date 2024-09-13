@@ -3,6 +3,11 @@ DEVICE_VARS += NETGEAR_BOARD_ID NETGEAR_HW_ID
 DEVICE_VARS += RAS_BOARD RAS_ROOTFS_SIZE RAS_VERSION
 DEVICE_VARS += WRGG_DEVNAME WRGG_SIGNATURE
 
+define Build/netgear-fit-padding
+	./netgear-fit-padding.py $@ $@.new
+	mv $@.new $@
+endef
+
 define Device/FitImage
 	KERNEL_SUFFIX := -uImage.itb
 	KERNEL = kernel-bin | gzip | fit gzip $$(KDIR)/image-$$(DEVICE_DTS).dtb
@@ -33,8 +38,8 @@ define Device/DniImage
 	NETGEAR_BOARD_ID :=
 	NETGEAR_HW_ID :=
 	IMAGES += factory.img
-	IMAGE/factory.img := append-kernel | pad-offset 64k 64 | append-uImage-fakehdr filesystem | append-rootfs | pad-rootfs | netgear-dni
-	IMAGE/sysupgrade.bin := append-kernel | pad-offset 64k 64 | append-uImage-fakehdr filesystem | \
+	IMAGE/factory.img := append-kernel | netgear-fit-padding | append-uImage-fakehdr filesystem | append-rootfs | pad-rootfs | netgear-dni
+	IMAGE/sysupgrade.bin := append-kernel | netgear-fit-padding | append-uImage-fakehdr filesystem | \
 		append-rootfs | pad-rootfs | check-size | append-metadata
 endef
 
@@ -174,12 +179,14 @@ endef
 define Device/aruba_ap-303
 	$(call Device/aruba_glenmorangie)
 	DEVICE_MODEL := AP-303
+	DEVICE_DTS_CONFIG := Glenmorangie@1
 endef
 TARGET_DEVICES += aruba_ap-303
 
 define Device/aruba_ap-303h
 	$(call Device/aruba_glenmorangie)
 	DEVICE_MODEL := AP-303H
+	DEVICE_DTS_CONFIG := Aberlour@1
 endef
 TARGET_DEVICES += aruba_ap-303h
 
@@ -187,6 +194,7 @@ define Device/aruba_ap-365
 	$(call Device/aruba_glenmorangie)
 	DEVICE_MODEL := AP-365
 	DEVICE_PACKAGES := kmod-hwmon-ad7418
+	DEVICE_DTS_CONFIG := Bunker@1
 endef
 TARGET_DEVICES += aruba_ap-365
 
@@ -447,6 +455,8 @@ define Device/engenius_eap1300
 	$(call Device/FitImage)
 	DEVICE_VENDOR := EnGenius
 	DEVICE_MODEL := EAP1300
+	DEVICE_ALT0_VENDOR := EnGenius
+	DEVICE_ALT0_MODEL := EAP1300EXT
 	DEVICE_DTS_CONFIG := config@4
 	BOARD_NAME := eap1300
 	SOC := qcom-ipq4018
@@ -732,7 +742,7 @@ define Device/linksys_whw03
 	IMAGES += factory.bin
 	IMAGE/factory.bin  := append-kernel | pad-to $$$$(KERNEL_SIZE) | append-rootfs | pad-rootfs | linksys-image type=WHW03
 	DEVICE_PACKAGES := ath10k-firmware-qca9888-ct kmod-leds-pca963x kmod-spi-dev kmod-bluetooth \
-		kmod-fs-ext4 e2fsprogs kmod-fs-f2fs mkf2fs losetup
+		kmod-fs-ext4 e2fsprogs kmod-fs-f2fs mkf2fs losetup ipq-wifi-linksys_whw03
 endef
 TARGET_DEVICES += linksys_whw03
 
@@ -1272,7 +1282,7 @@ TARGET_DEVICES += zte_mf289f
 
 define Device/zyxel_nbg6617
 	$(call Device/FitImageLzma)
-	DEVICE_VENDOR := ZyXEL
+	DEVICE_VENDOR := Zyxel
 	DEVICE_MODEL := NBG6617
 	SOC := qcom-ipq4018
 	KERNEL_SIZE := 4096k
@@ -1282,7 +1292,7 @@ define Device/zyxel_nbg6617
 	RAS_VERSION := "$(VERSION_DIST) $(REVISION)"
 	IMAGE/sysupgrade.bin := append-kernel | append-rootfs | pad-rootfs | append-metadata
 	IMAGES += factory.bin
-#	The ZyXEL firmware allows flashing thru the web-gui only when the rootfs is
+#	The Zyxel firmware allows flashing thru the web-gui only when the rootfs is
 #	at least as large as the one of the initial firmware image (not the current
 #	one on the device). This only applies to the Web-UI, the bootlaoder ignores
 #	this minimum-size. However, the larger image can be flashed both ways.
@@ -1294,7 +1304,7 @@ TARGET_DEVICES += zyxel_nbg6617
 
 define Device/zyxel_wre6606
 	$(call Device/FitImage)
-	DEVICE_VENDOR := ZyXEL
+	DEVICE_VENDOR := Zyxel
 	DEVICE_MODEL := WRE6606
 	DEVICE_DTS_CONFIG := config@4
 	SOC := qcom-ipq4018

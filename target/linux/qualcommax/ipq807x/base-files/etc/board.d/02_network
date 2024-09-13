@@ -11,10 +11,14 @@ ipq807x_setup_interfaces()
 	local board="$1"
 
 	case "$board" in
+	asus,rt-ax89x)
+		ucidef_set_interfaces_lan_wan "10g-sfp 10g-copper lan1 lan2 lan3 lan4 lan5 lan6 lan7 lan8" "wan"
+		;;
 	arcadyan,aw1000|\
 	buffalo,wxr-5950ax12|\
 	dynalink,dl-wrx36|\
 	linksys,mx5300|\
+	linksys,mx8500|\
 	xiaomi,ax9000|\
 	zbtlink,zbt-z800ax)
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3 lan4" "wan"
@@ -42,6 +46,10 @@ ipq807x_setup_interfaces()
 	netgear,rax120v2)
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3 lan4 lan5" "wan"
 		;;
+	netgear,sxr80|\
+	netgear,sxs80)
+		ucidef_set_interfaces_lan_wan "lan2 lan3 lan4 lan5" "wan"
+		;;
 	netgear,wax218|\
 	netgear,wax620)
 		ucidef_set_interface_lan "lan" "dhcp"
@@ -51,6 +59,9 @@ ipq807x_setup_interfaces()
 		;;
 	qnap,301w)
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3 lan4 10g-2" "10g-1"
+		;;
+	tplink,eap660hd-v1)
+		ucidef_set_interface_lan "lan" "dhcp"
 		;;
 	zyxel,nbg7815)
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3 lan4 10g" "wan"
@@ -75,6 +86,15 @@ ipq807x_setup_macs()
 				[ "$(mtd_get_mac_ascii u_env eth${i}addr)" != "$label_mac" ] && lan_mac=$label_mac
 			done
 			[ "$(mtd_get_mac_ascii u_env eth2addr)" != "$label_mac" ] && wan_mac=$label_mac
+		;;
+		linksys,mx8500)
+			label_mac=$(mtd_get_mac_ascii devinfo hw_mac_addr)
+			lan_mac=$(macaddr_add $label_mac 1)
+			wan_mac=$label_mac
+		;;
+		tplink,eap660hd-v1)
+			label_mac=$(get_mac_binary /tmp/factory_data/default-mac 0)
+			lan_mac=$label_mac
 		;;
 	esac
 

@@ -12,6 +12,7 @@ GRUB_TERMINAL_CONFIG =
 GRUB_CONSOLE_CMDLINE = earlycon
 
 ifneq ($(CONFIG_GRUB_CONSOLE),)
+  GRUB_CONSOLE_CMDLINE += console=tty1
   GRUB_TERMINALS += console
 endif
 
@@ -108,7 +109,8 @@ define Device/generic
 	kmod-fsl-enetc-net kmod-dwmac-imx kmod-fsl-fec kmod-thunderx-net \
 	kmod-dwmac-rockchip kmod-dwmac-sun8i kmod-phy-aquantia kmod-phy-broadcom \
 	kmod-phy-marvell kmod-phy-marvell-10g kmod-sfp kmod-atlantic \
-	kmod-bcmgenet kmod-octeontx2-net
+	kmod-bcmgenet kmod-octeontx2-net kmod-renesas-net-avb \
+	kmod-phy-realtek kmod-phy-smsc
 endef
 TARGET_DEVICES += generic
 

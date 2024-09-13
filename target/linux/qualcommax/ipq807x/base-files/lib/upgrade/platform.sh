@@ -27,12 +27,96 @@ xiaomi_initramfs_prepare() {
 	ubiformat /dev/mtd$kern_mtdnum -y
 }
 
+asus_initial_setup() {
+	# Remove existing linux and jffs2 volumes
+	[ "$(rootfs_type)" = "tmpfs" ] || return 0
+
+	ubirmvol /dev/ubi0 -N linux
+	ubirmvol /dev/ubi0 -N jffs2
+}
+
+remove_oem_ubi_volume() {
+	local oem_volume_name="$1"
+	local oem_ubivol
+	local mtdnum
+	local ubidev
+
+	mtdnum=$(find_mtd_index "$CI_UBIPART")
+	if [ ! "$mtdnum" ]; then
+		return
+	fi
+
+	ubidev=$(nand_find_ubi "$CI_UBIPART")
+	if [ ! "$ubidev" ]; then
+		ubiattach --mtdn="$mtdnum"
+		ubidev=$(nand_find_ubi "$CI_UBIPART")
+	fi
+
+	if [ "$ubidev" ]; then
+		oem_ubivol=$(nand_find_volume "$ubidev" "$oem_volume_name")
+		[ "$oem_ubivol" ] && ubirmvol "/dev/$ubidev" --name="$oem_volume_name"
+	fi
+}
+
+tplink_get_boot_part() {
+	local cur_boot_part
+	local args
+
+	# Try to find rootfs from kernel arguments
+	read -r args < /proc/cmdline
+	for arg in $args; do
+		local ubi_mtd_arg=${arg#ubi.mtd=}
+		case "$ubi_mtd_arg" in
+		rootfs|rootfs_1)
+			echo "$ubi_mtd_arg"
+			return
+		;;
+		esac
+	done
+
+	# Fallback to u-boot env (e.g. when running initramfs)
+	cur_boot_part="$(/usr/sbin/fw_printenv -n tp_boot_idx)"
+	case $cur_boot_part in
+	1)
+		echo rootfs_1
+		;;
+	0|*)
+		echo rootfs
+		;;
+	esac
+}
+
+tplink_do_upgrade() {
+	local new_boot_part
+
+	case $(tplink_get_boot_part) in
+	rootfs)
+		CI_UBIPART="rootfs_1"
+		new_boot_part=1
+	;;
+	rootfs_1)
+		CI_UBIPART="rootfs"
+		new_boot_part=0
+	;;
+	esac
+
+	fw_setenv -s - <<-EOF
+		tp_boot_idx $new_boot_part
+	EOF
+
+	remove_oem_ubi_volume ubi_rootfs
+	nand_do_upgrade "$1"
+}
+
 platform_check_image() {
 	return 0;
 }
 
 platform_pre_upgrade() {
 	case "$(board_name)" in
+	asus,rt-ax89x)
+		asus_initial_setup
+		;;
 	redmi,ax6|\
 	xiaomi,ax3600|\
 	xiaomi,ax9000)
@@ -49,10 +133,17 @@ platform_do_upgrade() {
 	dynalink,dl-wrx36|\
 	edimax,cax1800|\
 	netgear,rax120v2|\
+	netgear,sxr80|\
+	netgear,sxs80|\
 	netgear,wax218|\
 	netgear,wax620|\
-	netgear,wax630|\
-	zbtlink,zbt-z800ax)
+	netgear,wax630)
+		nand_do_upgrade "$1"
+		;;
+	asus,rt-ax89x)
+		CI_UBIPART="UBI_DEV"
+		CI_KERNPART="linux"
+		CI_ROOTPART="jffs2"
 		nand_do_upgrade "$1"
 		;;
 	buffalo,wxr-5950ax12)
@@ -77,7 +168,8 @@ platform_do_upgrade() {
 		;;
 	linksys,mx4200v1|\
 	linksys,mx4200v2|\
-	linksys,mx5300)
+	linksys,mx5300|\
+	linksys,mx8500)
 		boot_part="$(fw_printenv -n boot_part)"
 		if [ "$boot_part" -eq "1" ]; then
 			fw_setenv boot_part 2
@@ -97,6 +189,9 @@ platform_do_upgrade() {
 		kernelname="0:HLOS"
 		rootfsname="rootfs"
 		mmc_do_upgrade "$1"
+		;;
+	tplink,eap660hd-v1)
+		tplink_do_upgrade "$1"
 		;;
 	redmi,ax6|\
 	xiaomi,ax3600|\
@@ -127,6 +222,18 @@ platform_do_upgrade() {
 		# force altbootcmd which handles partition change in u-boot
 		fw_setenv bootcount 3
 		fw_setenv upgrade_available 1
+		nand_do_upgrade "$1"
+		;;
+	zbtlink,zbt-z800ax)
+		local mtdnum="$(find_mtd_index 0:bootconfig)"
+		local alt_mtdnum="$(find_mtd_index 0:bootconfig1)"
+		part_num="$(hexdump -e '1/1 "%01x|"' -n 1 -s 168 -C /dev/mtd$mtdnum | cut -f 1 -d "|" | head -n1)"
+		# vendor firmware may swap the rootfs partition location, u-boot append: ubi.mtd=rootfs
+		# since we use fixed-partitions, need to force boot from the first rootfs partition
+		if [ "$part_num" -eq "1" ]; then
+			mtd erase /dev/mtd$mtdnum
+			mtd erase /dev/mtd$alt_mtdnum
+		fi
 		nand_do_upgrade "$1"
 		;;
 	zte,mf269)

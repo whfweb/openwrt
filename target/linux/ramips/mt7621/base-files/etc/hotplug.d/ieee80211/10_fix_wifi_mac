@@ -27,6 +27,13 @@ case "$board" in
 		hw_mac_addr=$(macaddr_unsetbit $hw_mac_addr 28)
 		[ "$PHYNBR" = "1" ] && macaddr_setbit_la $hw_mac_addr > /sys${DEVPATH}/macaddress
 		;;
+	buffalo,wsr-2533dhpls)
+		lan_mac_addr=$(mtd_get_mac_ascii board_data "mac")
+		[ "$PHYNBR" = "0" ] && \
+			macaddr_add $lan_mac_addr 1 > /sys${DEVPATH}/macaddress
+		[ "$PHYNBR" = "1" ] && \
+			macaddr_add $lan_mac_addr 8 > /sys${DEVPATH}/macaddress
+		;;
 	comfast,cf-e390ax)
 		[ "$PHYNBR" = "0" ] && echo -n "$(mtd_get_mac_binary factory 0x0004)" > /sys${DEVPATH}/macaddress
 		[ "$PHYNBR" = "1" ] && echo -n "$(mtd_get_mac_binary factory 0x8004)" > /sys${DEVPATH}/macaddress
@@ -119,6 +126,10 @@ case "$board" in
 		[ "$PHYNBR" = "1" ] && \
 			macaddr_setbit_la "$(mtd_get_mac_binary Factory 0x4)" > /sys${DEVPATH}/macaddress
 		;;
+	keenetic,kn-3510)
+		[ "$PHYNBR" = "1" ] && \
+			macaddr_setbit_la "$(mtd_get_mac_binary rf-eeprom 0x4)" > /sys${DEVPATH}/macaddress
+		;;
 	linksys,e5600|\
 	linksys,ea6350-v4|\
 	linksys,ea7300-v1|\
@@ -143,6 +154,11 @@ case "$board" in
 		;;
 	netgear,wax202)
 		hw_mac_addr=$(mtd_get_mac_ascii Config mac)
+		[ "$PHYNBR" = "0" ] && macaddr_add $hw_mac_addr 2 > /sys${DEVPATH}/macaddress
+		[ "$PHYNBR" = "1" ] && macaddr_add $hw_mac_addr 3 > /sys${DEVPATH}/macaddress
+		;;
+	netgear,wax214v2)
+		hw_mac_addr=$(mtd_get_mac_ascii Config ethaddr)
 		[ "$PHYNBR" = "0" ] && macaddr_add $hw_mac_addr 2 > /sys${DEVPATH}/macaddress
 		[ "$PHYNBR" = "1" ] && macaddr_add $hw_mac_addr 3 > /sys${DEVPATH}/macaddress
 		;;

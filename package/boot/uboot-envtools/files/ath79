@@ -89,6 +89,8 @@ zyxel,nbg6616)
 aruba,ap-105|\
 aruba,ap-115|\
 aruba,ap-175|\
+belkin,f9j1108-v2|\
+belkin,f9k1115-v2|\
 dongwon,dw02-412h-64m|\
 dongwon,dw02-412h-128m|\
 glinet,gl-ar300m-lite|\
@@ -109,13 +111,17 @@ buffalo,wzr-hp-g300nh-s|\
 linksys,ea4500-v3)
 	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x20000" "0x20000"
 	;;
+dell,apl26-0ae)
+	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x40000" "0x10000"
+	;;
 domywifi,dw33d)
 	ubootenv_add_uci_config "/dev/mtd4" "0x0" "0x10000" "0x10000"
 	;;
 glinet,gl-ar150)
 	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x8000" "0x10000"
 	;;
-huawei,ap5030dn)
+huawei,ap5030dn|\
+huawei,ap6010dn)
 	ubootenv_add_uci_config "/dev/mtd3" "0x0" "0x20000" "0x20000"
 	;;
 netgear,wndr3700|\

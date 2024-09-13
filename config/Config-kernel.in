@@ -50,6 +50,11 @@ config KERNEL_ARM_PMU
 	default y if TARGET_armsr_armv8
 	depends on (arm || aarch64)
 
+config KERNEL_ARM_PMUV3
+	bool
+	default y if TARGET_armsr_armv8
+	depends on (arm_v7 || aarch64) && LINUX_6_6
+
 config KERNEL_RISCV_PMU
 	bool
 	select KERNEL_RISCV_PMU_SBI
@@ -79,6 +84,7 @@ config KERNEL_X86_VSYSCALL_EMULATION
 config KERNEL_PERF_EVENTS
 	bool "Compile the kernel with performance events and counters"
 	select KERNEL_ARM_PMU if (arm || aarch64)
+	select KERNEL_ARM_PMUV3 if (arm_v7 || aarch64) && LINUX_6_6
 	select KERNEL_RISCV_PMU if riscv64
 
 config KERNEL_PROFILING
@@ -166,16 +172,6 @@ config KERNEL_KASAN
 	  For better error detection enable CONFIG_STACKTRACE.
 	  Currently CONFIG_KASAN doesn't work with CONFIG_DEBUG_SLAB
 	  (the resulting kernel does not boot).
-
-config KERNEL_KASAN_EXTRA
-	bool "KAsan: extra checks"
-	depends on KERNEL_KASAN && KERNEL_DEBUG_KERNEL
-	help
-	  This enables further checks in the kernel address sanitizer, for now
-	  it only includes the address-use-after-scope check that can lead
-	  to excessive kernel stack usage, frame size warnings and longer
-	  compile time.
-	  https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81715 has more
 
 config KERNEL_KASAN_VMALLOC
 	bool "Back mappings in vmalloc space with real shadow memory"
@@ -429,7 +425,6 @@ config KERNEL_DEBUG_INFO
 	  This will compile your kernel and modules with debug information.
 
 config KERNEL_DEBUG_INFO_BTF
-
 	bool "Enable additional BTF type information"
 	depends on !HOST_OS_MACOS
 	depends on KERNEL_DEBUG_INFO && !KERNEL_DEBUG_INFO_REDUCED
@@ -441,9 +436,13 @@ config KERNEL_DEBUG_INFO_BTF
 
 	  Required to run BPF CO-RE applications.
 
+config KERNEL_DEBUG_INFO_BTF_MODULES
+	def_bool y
+	depends on KERNEL_DEBUG_INFO_BTF
+
 config KERNEL_MODULE_ALLOW_BTF_MISMATCH
 	bool "Allow loading modules with non-matching BTF type info"
-	depends on KERNEL_DEBUG_INFO_BTF
+	depends on KERNEL_DEBUG_INFO_BTF_MODULES
 	help
 	  For modules whose split BTF does not match vmlinux, load without
 	  BTF rather than refusing to load. The default behavior with
@@ -546,6 +545,10 @@ config KERNEL_BPF_EVENTS
 	  This is required to use BPF maps of type BPF_MAP_TYPE_PERF_EVENT_ARRAY
 	  for sending data from BPF programs to user-space for post-processing
 	  or logging.
+
+config KERNEL_PROBE_EVENTS_BTF_ARGS
+	bool "Support BTF function arguments for probe events"
+	depends on KERNEL_DEBUG_INFO_BTF && KERNEL_KPROBE_EVENTS && LINUX_6_6
 
 config KERNEL_BPF_KPROBE_OVERRIDE
 	bool
@@ -1235,13 +1238,20 @@ if KERNEL_IP_PNP
 
 endif
 
+config KERNEL_BTRFS_FS
+	bool "Compile the kernel with built-in BTRFS support"
+	help
+	  Say Y here if you want to make the kernel to be able to boot off a
+	  BTRFS partition.
+
 menu "Filesystem ACL and attr support options"
 	config USE_FS_ACL_ATTR
 		bool "Use filesystem ACL and attr support by default"
+		default y if !SMALL_FLASH
 		help
 		  Make using ACLs (e.g. POSIX ACL, NFSv4 ACL) the default
-		  for kernel and packages, except tmpfs, flash filesystems,
-		  and old NFS.  Also enable userspace extended attribute support
+		  for kernel and packages, except old NFS.
+		  Also enable userspace extended attribute support
 		  by default.  (OpenWrt already has an expection it will be
 		  present in the kernel).
 
@@ -1262,14 +1272,17 @@ menu "Filesystem ACL and attr support options"
 	config KERNEL_F2FS_FS_POSIX_ACL
 		bool "Enable POSIX ACL for F2FS Filesystems"
 		select KERNEL_FS_POSIX_ACL
+		default y if USE_FS_ACL_ATTR
 
 	config KERNEL_JFFS2_FS_POSIX_ACL
 		bool "Enable POSIX ACL for JFFS2 Filesystems"
 		select KERNEL_FS_POSIX_ACL
+		default y if USE_FS_ACL_ATTR
 
 	config KERNEL_TMPFS_POSIX_ACL
 		bool "Enable POSIX ACL for TMPFS Filesystems"
 		select KERNEL_FS_POSIX_ACL
+		default y if USE_FS_ACL_ATTR
 
 	config KERNEL_CIFS_ACL
 		bool "Enable CIFS ACLs"
@@ -1406,15 +1419,19 @@ config KERNEL_LSM
 
 config KERNEL_EXT4_FS_SECURITY
 	bool "Ext4 Security Labels"
+	default y if !SMALL_FLASH
 
 config KERNEL_F2FS_FS_SECURITY
 	bool "F2FS Security Labels"
+	default y if !SMALL_FLASH
 
 config KERNEL_UBIFS_FS_SECURITY
 	bool "UBIFS Security Labels"
+	default y if !SMALL_FLASH
 
 config KERNEL_JFFS2_FS_SECURITY
 	bool "JFFS2 Security Labels"
+	default y if !SMALL_FLASH
 
 config KERNEL_WERROR
 	bool "Compile the kernel with warnings as errors"

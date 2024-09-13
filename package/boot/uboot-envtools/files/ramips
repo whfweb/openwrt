@@ -70,6 +70,7 @@ zte,mf283plus)
 asus,rt-ax53u|\
 asus,rt-ax54|\
 belkin,rt1800|\
+elecom,wrc-x1800gs|\
 h3c,tx1800-plus|\
 h3c,tx1801-plus|\
 h3c,tx1806|\
@@ -144,6 +145,10 @@ xiaomi,mi-router-cr6606|\
 xiaomi,mi-router-cr6608|\
 xiaomi,mi-router-cr6609)
 	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x10000" "0x20000"
+	;;
+netgear,wax214v2)
+	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x20000" "0x20000"
+	ubootenv_add_uci_sys_config "/dev/mtd1" "0x20000" "0x8000" "0x20000"
 	;;
 esac
 
