@@ -1,3 +1,74 @@
+## 编译命令
+
+1. 首先装好 Linux 系统，推荐 Debian 11 或 Ubuntu LTS
+
+
+2. 安装编译依赖
+   ```bash
+   sudo apt update -y
+   sudo apt full-upgrade -y
+   sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+   bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
+   git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev \
+   libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz \
+   mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pip libpython3-dev qemu-utils \
+   rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+   ```
+
+3. 下载源代码，更新 feeds 并选择配置
+
+   ```bash
+git config --global http.sslverify false
+
+git config --global https.sslverify false
+
+git clone -b master  https://github.com/whfweb/openwrt.git
+   
+cd openwrt
+
+（ 将对 ./openwrt 目录及其所有子目录中的文件添加读、写、执行权限：sudo chmod 777 -R ./test）
+   
+   ./scripts/feeds update -a
+   
+   ./scripts/feeds install -a
+   
+   make menuconfig
+   ```
+
+4. 下载 dl 库，编译固件
+（-j 后面是线程数，第一次编译推荐用单线程）
+
+   ```bash
+   make download -j8
+   make V=s -j1
+   ```
+
+
+二次编译：
+
+make clean     仅仅是清除之前编译的可执行文件及配置文件，比如bin路径下面的文件，config配置文件不会清除。
+make distclean 清除所有生成的文件，连feeds也会干掉，只留下git clone完成时候的初始状态。
+make -j$(($(nproc) + 1)) V=s
+
+```bash
+cd openwrt
+git pull
+./scripts/feeds update -a
+./scripts/feeds install -a
+make defconfig
+make download -j8
+make V=s -j$(nproc)
+```
+
+如果需要重新配置：
+
+rm -rf ./tmp && rm -rf .config
+
+
+
+make clean      
+make distclean  
+
 ![OpenWrt logo](include/logo.png)
 
 OpenWrt Project is a Linux operating system targeting embedded devices. Instead
@@ -31,7 +102,7 @@ An advanced user may require additional or specific package. (Toolchain, SDK, ..
 
 ## Development
 
-To build your own firmware you need a GNU/Linux, BSD or macOS system (case
+To build your own firmware you need a GNU/Linux, BSD or MacOSX system (case
 sensitive filesystem required). Cygwin is unsupported because of the lack of a
 case sensitive file system.
 
@@ -44,7 +115,7 @@ documentation.
 
 ```
 binutils bzip2 diff find flex gawk gcc-6+ getopt grep install libc-dev libz-dev
-make4.1+ perl python3.7+ rsync subversion unzip which
+make4.1+ perl python3.6+ rsync subversion unzip which
 ```
 
 ### Quickstart
@@ -104,5 +175,6 @@ For a list of supported devices see the [OpenWrt Hardware Database](https://open
 * [Dev Chat](https://webchat.oftc.net/#openwrt-devel): Channel `#openwrt-devel` on **oftc.net**.
 
 ## License
+
 
 OpenWrt is licensed under GPL-2.0
