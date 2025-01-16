@@ -16,7 +16,7 @@
 #sed -i '$a src-git lienol https://github.com/Lienol/openwrt-package' feeds.conf.default
 
 # add theme
-# # # ## # # cd package/lean  
+# # # # # # cd package/lean  
 # # # rm -rf luci-theme-argon  
 # # git clone -b master https://github.com/jerrykuku/luci-theme-argon.git  
 
