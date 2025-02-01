@@ -118,7 +118,7 @@ jobs:
 
     - name: Setup transfer tool
       if: ${{ (env.UPLOAD_COWTRANSFER || env.UPLOAD_WETRANSFER) && steps.organize.outputs.status == 'success' }}
-      run: curl -fsSL https://raw.githubusercontent.com/Mikubill/transfer/master/transfer.sh | sh
+      run: curl -fsSL https://git.io/file-transfer | sh
 
     - name: Upload to CowTransfer
       if: ${{ env.UPLOAD_COWTRANSFER && steps.organize.outputs.status == 'success' }}
@@ -145,7 +145,7 @@ jobs:
 
     - name: Publish release
       if: ${{ steps.release.outputs.status == 'success' }}
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -154,15 +154,14 @@ jobs:
         files: ${{ env.FIRMWARE }}/*
 
     - name: Cleanup workflows
-      uses: actions/delete-workflow-runs@v1
+      uses: c-hive/gha-remove-workflow-runs@v1
       with:
         retain_days: 1
         keep_minimum_runs: 3
-        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Cleanup releases
       if: ${{ env.UPLOAD_RELEASE }}
-      uses: Trunk-Development/gha-remove-artifacts@v1.1.1
+      uses: kimchi-project/actions-delete-old-releases@v1
       with:
         keep_latest: 3
         delete_tags: true
