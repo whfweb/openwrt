@@ -154,16 +154,20 @@ jobs:
         files: ${{ env.FIRMWARE }}/*
 
     - name: Cleanup workflows
-      uses: c-hive/gha-remove-workflow-runs@v1
+      uses: snok/delete-workflow-runs@v1
       with:
-        retain_days: 1
+        older_than_days: 1
         keep_minimum_runs: 3
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Cleanup releases
       if: ${{ env.UPLOAD_RELEASE }}
-      uses: kimchi-project/actions-delete-old-releases@v1
+      uses: ncipollo/release-action@v1
       with:
+        allow_updates: true
+        delete_untagged: true
         keep_latest: 3
-        delete_tags: true
+        draft: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
