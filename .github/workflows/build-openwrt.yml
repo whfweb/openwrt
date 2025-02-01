@@ -12,7 +12,7 @@ env:
   CONFIG_FILE: config/ssr.config
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
-  ssh: true
+  ssh: false
   UPLOAD_BIN_DIR: true
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
@@ -66,7 +66,7 @@ jobs:
         chmod +x "$DIY_P2_SH" && "./$DIY_P2_SH"
 
     - name: SSH connection
-      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(gith
+      if: ${{ env.ssh }}
       uses: P3TERX/ssh2actions@v1.0.0
       env:
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
