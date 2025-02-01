@@ -25,8 +25,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@main  # 使用固定版本号
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
     - name: Initialize environment
       env:
@@ -46,7 +46,7 @@ jobs:
         git clone --single-branch --branch "$REPO_BRANCH" "$REPO_URL" openwrt
         ln -sf /workdir/openwrt "$GITHUB_WORKSPACE/openwrt"
 
-    - name: Setup feeds
+    - name: Setup feeds configuration
       run: |
         [ -e "$FEEDS_CONF" ] && mv "$FEEDS_CONF" openwrt/feeds.conf.default
         chmod +x "$DIY_P1_SH" && "./$DIY_P1_SH"
@@ -95,7 +95,7 @@ jobs:
 
     - name: Upload binaries
       if: ${{ steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR }}
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v4
       with:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: openwrt/bin
@@ -109,9 +109,9 @@ jobs:
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: Upload firmware
+    - name: Upload firmware artifacts
       if: ${{ steps.organize.outputs.status == 'success' && !cancelled() }}
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v4
       with:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
@@ -154,14 +154,14 @@ jobs:
         files: ${{ env.FIRMWARE }}/*
 
     - name: Cleanup workflows
-      uses: GitRML/delete-workflow-runs@v1  # 使用更新版本
+      uses: GitRML/delete-workflow-runs@v2
       with:
         retain_days: 1
         keep_minimum_runs: 3
 
     - name: Cleanup releases
       if: ${{ env.UPLOAD_RELEASE }}
-      uses: dev-drprasad/delete-older-releases@v0.2.1  # 使用更新版本
+      uses: dev-drprasad/delete-older-releases@v0.3.0
       with:
         keep_latest: 3
         delete_tags: true
