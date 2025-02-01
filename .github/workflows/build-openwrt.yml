@@ -118,18 +118,18 @@ jobs:
 
     - name: Setup transfer tool
       if: ${{ (env.UPLOAD_COWTRANSFER || env.UPLOAD_WETRANSFER) && steps.organize.outputs.status == 'success' }}
-      run: curl -fsSL https://raw.githubusercontent.com/P3TERX/transfer/master/install.sh | bash
+      run: curl -fsSL https://raw.githubusercontent.com/Mikubill/transfer/master/transfer.sh | sh
 
     - name: Upload to CowTransfer
       if: ${{ env.UPLOAD_COWTRANSFER && steps.organize.outputs.status == 'success' }}
       run: |
-        transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} | tee cowtransfer.log
+        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} | tee cowtransfer.log
         echo "url=$(grep 'https' cowtransfer.log | cut -d' ' -f3)" >> $GITHUB_OUTPUT
 
     - name: Upload to WeTransfer
       if: ${{ env.UPLOAD_WETRANSFER && steps.organize.outputs.status == 'success' }}
       run: |
-        transfer wet -s -p 16 --no-progress ${FIRMWARE} | tee wetransfer.log
+        ./transfer wet -s -p 16 --no-progress ${FIRMWARE} | tee wetransfer.log
         echo "url=$(grep 'https' wetransfer.log | cut -d' ' -f3)" >> $GITHUB_OUTPUT
 
     - name: Prepare release
@@ -145,7 +145,7 @@ jobs:
 
     - name: Publish release
       if: ${{ steps.release.outputs.status == 'success' }}
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -154,14 +154,15 @@ jobs:
         files: ${{ env.FIRMWARE }}/*
 
     - name: Cleanup workflows
-      uses: GeekMasher/advanced-actions-cleanup@v1
+      uses: actions/delete-workflow-runs@v1
       with:
-        days-old: 1
-        minimum-runs: 3
+        retain_days: 1
+        keep_minimum_runs: 3
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Cleanup releases
       if: ${{ env.UPLOAD_RELEASE }}
-      uses: c-hive/gha-remove-old-release-assets@v1
+      uses: Trunk-Development/gha-remove-artifacts@v1.1.1
       with:
         keep_latest: 3
         delete_tags: true
