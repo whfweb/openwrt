@@ -145,7 +145,7 @@ jobs:
 
     - name: Publish release
       if: ${{ steps.release.outputs.status == 'success' }}
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -154,20 +154,16 @@ jobs:
         files: ${{ env.FIRMWARE }}/*
 
     - name: Cleanup workflows
-      uses: snok/delete-workflow-runs@v1
+      uses: GitRML/delete-workflow-runs@v2
       with:
-        older_than_days: 1
+        retain_days: 1
         keep_minimum_runs: 3
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Cleanup releases
       if: ${{ env.UPLOAD_RELEASE }}
-      uses: ncipollo/release-action@v1
+      uses: dev-drprasad/delete-older-releases@v0.3.0
       with:
-        allow_updates: true
-        delete_untagged: true
         keep_latest: 3
-        draft: false
+        delete_tags: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
