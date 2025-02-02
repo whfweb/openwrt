@@ -4,9 +4,8 @@ on:
   repository_dispatch:
   watch: 
     types: started
-      
-     on:
-     workflow_dispatch:
+   
+    workflow_dispatch:
        inputs:
          my_input:
            description: 'Optional input'
