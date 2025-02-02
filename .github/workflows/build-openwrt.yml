@@ -5,7 +5,8 @@ on:
   watch: 
     types: started
       
-  workflow_dispatch:
+     on:
+     workflow_dispatch:
        inputs:
          my_input:
            description: 'Optional input'
