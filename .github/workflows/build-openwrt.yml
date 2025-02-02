@@ -4,6 +4,13 @@ on:
   repository_dispatch:
   watch: 
     types: started
+      
+  workflow_dispatch:
+       inputs:
+         my_input:
+           description: 'Optional input'
+           required: false
+           default: 'default_value'
 
 env:
   REPO_URL: https://github.com/whfweb/openwrt
