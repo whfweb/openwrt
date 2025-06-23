@@ -624,7 +624,7 @@ $(eval $(call KernelPackage,regmap-core))
 define KernelPackage/regmap-spi
   SUBMENU:=$(OTHER_MENU)
   TITLE:=SPI register map support
-  DEPENDS:=+kmod-regmap-core
+  DEPENDS:=+kmod-regmap-core @!TARGET_uml
   HIDDEN:=1
   KCONFIG:=CONFIG_REGMAP_SPI \
 	   CONFIG_SPI=y
@@ -968,7 +968,7 @@ $(eval $(call KernelPackage,tpm))
 define KernelPackage/tpm-tis
   SUBMENU:=$(OTHER_MENU)
   TITLE:=TPM TIS 1.2 Interface / TPM 2.0 FIFO Interface
-	DEPENDS:= @TARGET_x86 +kmod-tpm
+	DEPENDS:= @(TARGET_x86||TARGET_armsr) +kmod-tpm
   KCONFIG:= CONFIG_TCG_TIS
   FILES:= \
 	$(LINUX_DIR)/drivers/char/tpm/tpm_tis.ko \
