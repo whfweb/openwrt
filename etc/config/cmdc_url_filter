@@ -1,0 +1,3 @@
+config global 'global'
+	option switch '1'
+	option filterOp 'black'

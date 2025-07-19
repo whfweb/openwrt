@@ -1,0 +1,38 @@
+############################################################
+# andlink ssid2 wifi filter
+
+WIFIBACKUP_ENABLE=$(uci get cmdc_wifi.global.wifi5backup)
+
+WAN_MODE=$(uci get system.wancfg.mode_type)
+
+if [ "$WIFIBACKUP_ENABLE" = "0" ]; then
+    ebtables -t filter -F Cmcc_Guide_link_Limit
+    ebtables -t filter -D FORWARD -j Cmcc_Guide_link_Limit
+    ebtables -t filter -X Cmcc_Guide_link_Limit
+
+    iptables -D FORWARD -m physdev --physdev-in ra1 -j DROP
+    ip6tables -D FORWARD -m physdev --physdev-in ra1 -j DROP
+
+    ebtables -t filter -N Cmcc_Guide_link_Limit
+    ebtables -t filter -P Cmcc_Guide_link_Limit RETURN
+    ebtables -t filter -I FORWARD -j Cmcc_Guide_link_Limit
+
+    ebtables -A Cmcc_Guide_link_Limit -i ra1 -o eth+ -p arp -j ACCEPT
+    ebtables -A Cmcc_Guide_link_Limit -i ra1 -o eth+ -p IPv4 --ip-proto 17 --ip-dport 67 -j ACCEPT
+    ebtables -A Cmcc_Guide_link_Limit -i ra1 -o eth+ -j DROP
+
+    if [ "$WAN_MODE" = "2" ]; then
+        ebtables -A Cmcc_Guide_link_Limit -i ra1 -o apcli+ -p arp -j ACCEPT
+        ebtables -A Cmcc_Guide_link_Limit -i ra1 -o apcli+ -p IPv4 --ip-proto 17 --ip-dport 67 -j ACCEPT
+        ebtables -A Cmcc_Guide_link_Limit -i ra1 -o apcli+ -j DROP
+    fi
+
+    if [ "$WAN_MODE" = "0" ]; then
+        iptables -I FORWARD -m physdev --physdev-in ra1 -j DROP
+        ip6tables -I FORWARD -m physdev --physdev-in ra1 -j DROP
+    fi
+    if [ "$WAN_MODE" = "1" ]; then
+        echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
+        echo 1 > /proc/sys/net/bridge/bridge-nf-call-ip6tables
+    fi
+fi

@@ -1,0 +1,7 @@
+config cmapd container
+	option path		'/plugin/cmcc'
+	option rootfs		'/plugin/cmcc/framework'
+
+config cmapd andlink
+	option upgrade_backup	'disabled'
+	option format		'0'

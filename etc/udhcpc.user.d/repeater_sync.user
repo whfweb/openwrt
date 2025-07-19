@@ -1,0 +1,5 @@
+#!/bin/sh
+
+if [ "$1" == "bound" ]; then
+	/usr/bin/repeater_sync_uplink_info.sh sync
+fi

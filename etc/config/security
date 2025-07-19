@@ -1,0 +1,12 @@
+config firewall 'firewall'
+	option enable '1'
+	option level 'high'
+	option wanvisit_enable '0'
+
+config firewall_filter 'firewall_filter'
+	option switch '1'
+	option op 'black'
+
+config ahsapd_mac_filter 'ahsapd_mac_filter'
+	option enable '1'
+	option policy '0'

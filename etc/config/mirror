@@ -1,0 +1,8 @@
+config mirror 'global'
+    option enable 1
+    option dstport 0
+
+# config target
+#     option srcport '0'
+#     option direction rx
+    

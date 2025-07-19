@@ -1,0 +1,69 @@
+
+config global 'global'
+    option wifiswitch '1'
+    option wifidual '0'
+    option wifi5backup '0'
+    option use2_4gpwd '1'
+    option accessmode '0'
+    option unifautenable '0'
+
+config apcli 'apcli'
+    option backupchannel '0'
+
+config apcli 'apcli2g'
+    option keepwifiupflag '0'
+
+config apcli 'apcli5g'
+    option keepwifiupflag '0'
+
+config radio24G 'radio24G'
+    option enable '1'
+
+config radio5G 'radio5G'
+    option enable '1'
+
+config interface 'ra0'
+    option disabled '0'
+    
+config interface 'ra1'
+    option disabled '1'
+    
+config interface 'ra2'
+    option disabled '1'
+    
+config interface 'ra3'
+    option disabled '1'
+    
+config interface 'rax0'
+    option disabled '0'
+    
+config interface 'rax1'
+    option disabled '0'
+    
+config interface 'rax2'
+    option disabled '1'
+    
+config interface 'rax3'
+    option disabled '1'
+
+config band_steering 'band_steering'
+    option enable '0'
+    option rssithreshold2_4g '-60'
+    option rssithreshold5g '-80'
+    
+config guest 'guest'
+	option controlenable '0'
+	option keeptime '2'
+	option limitrateenable '0'
+	option maxrate '0'
+	option offsettime '0'
+
+config qostype 'qostype_0'
+        option band '2G'
+        option value '1'
+        option ssidpriority '0'
+
+config qostype 'qostype_1'
+        option band '5G'
+        option value '1'
+        option ssidpriority '0'

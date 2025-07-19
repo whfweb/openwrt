@@ -1,0 +1,16 @@
+config roaming 'global'
+    option enable '0'
+    option rssi_threshold_2g '-54'
+    option rssi_threshold_5g '-54'
+
+config low_qos 'low_qos'
+	option packet_loss '10'
+	option retry_ratio '10'
+	option xindex '0'
+	option detect_period '30000'
+	option rssi_check_delta '30'
+	option dismiss_time '5000'
+
+config ahsapd 'ahsapd'
+	option seqid ''
+	option lowrssipearid ''

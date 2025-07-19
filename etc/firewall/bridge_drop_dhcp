@@ -1,0 +1,20 @@
+ENABLE_DHCP_SERVER_ON_WAN="/var/run/cmdc_dhcp_server_on_wan"
+MODE_TYPE=$(uci get system.wancfg.mode_type)
+echo -e "\e[1;30;46m>>>>>> bridge_drop_dhcp MODE_TYPE=[${MODE_TYPE}] >>>>>> $*\e[0m"
+
+rule_count=$(ebtables -L | grep drop_dhcp -c)
+if [ $rule_count -gt 0 ]; then
+	#delete
+	ebtables -t filter -F drop_dhcp
+	ebtables -t filter -D FORWARD -j drop_dhcp
+	ebtables -t filter -D OUTPUT -j drop_dhcp
+	ebtables -t filter -X drop_dhcp
+fi
+
+if [[ "${MODE_TYPE}" == "1" ]] && [[ ! -f "$ENABLE_DHCP_SERVER_ON_WAN" ]]; then
+	#add
+	ebtables -t filter -N drop_dhcp -P RETURN
+	ebtables -t filter -I FORWARD -j drop_dhcp
+	ebtables -t filter -I OUTPUT -j drop_dhcp
+	ebtables -I drop_dhcp -p IPv4 --ip-proto udp --ip-dport 68 --ip-sport 67 -o eth1 -j DROP
+fi

@@ -1,0 +1,3 @@
+config kicksta 'kicksta'
+    option enable '0'
+    option rssi_threshold '-78'

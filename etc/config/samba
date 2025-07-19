@@ -1,0 +1,9 @@
+config samba
+    option workgroup 'WORKGROUP'
+    option charset 'UTF-8'
+    option macos '0'
+    option autoshare '1'
+    option allow_legacy_protocols 'yes'
+    option disable_netbios '1'
+    option description 'Samba'
+    option enable '0'

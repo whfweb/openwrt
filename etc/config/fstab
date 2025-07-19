@@ -1,0 +1,28 @@
+config 'global'
+	option	anon_swap	'0'
+	option	anon_mount	'1'
+	option	auto_swap	'1'
+	option	auto_mount	'1'
+	option	delay_root	'5'
+	option	check_fs	'0'
+
+config 'mount'
+	option	target	'/mnt/mmcblk0p10'
+	option	uuid	'7f572675-4b98c391-9cfaaf44-89f17883'
+	option	enabled	'1'
+
+config 'mount'
+	option	target	'/mnt/mmcblk0p11'
+	option	uuid	'bc9703b5-d6768e5f-d76b5326-de158c51'
+	option	enabled	'1'
+
+config 'mount'
+	option	target	'/mnt/mmcblk0p12'
+	option	uuid	'78b0b0cf-777f-497d-bf4a-a02246ed4bca'
+	option	enabled	'1'
+
+config 'mount'
+	option	target	'/mnt/mmcblk0p9'
+	option	uuid	'305a73eb-033f-41ae-8703-b51331bfeb18'
+	option	enabled	'1'
+

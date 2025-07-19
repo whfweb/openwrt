@@ -1,0 +1,78 @@
+############################################################
+# guest wifi  filter
+ebtables -t filter -F Cmcc_Guest_link_Limit
+ebtables -t filter -D FORWARD -j Cmcc_Guest_link_Limit
+ebtables -t filter -X Cmcc_Guest_link_Limit
+
+iptables -t filter -D FORWARD -j Cmcc_Guest_link_Ip_Limit
+ip6tables -t filter -D FORWARD -j Cmcc_Guest_link_Ip_Limit
+iptables -t filter -F Cmcc_Guest_link_Ip_Limit
+ip6tables -t filter -F Cmcc_Guest_link_Ip_Limit
+iptables -t filter -X Cmcc_Guest_link_Ip_Limit
+ip6tables -t filter -X Cmcc_Guest_link_Ip_Limit
+
+ebtables -t filter -N Cmcc_Guest_link_Limit
+ebtables -t filter -P Cmcc_Guest_link_Limit RETURN
+ebtables -t filter -I FORWARD -j Cmcc_Guest_link_Limit
+
+iptables -t filter -N Cmcc_Guest_link_Ip_Limit
+ip6tables -t filter -N Cmcc_Guest_link_Ip_Limit
+iptables -t filter -I FORWARD -j Cmcc_Guest_link_Ip_Limit
+ip6tables -t filter -I FORWARD -j Cmcc_Guest_link_Ip_Limit
+
+ebtables -t filter -F Cmcc_Guest_link_web_Limit
+ebtables -t filter -D INPUT -j Cmcc_Guest_link_web_Limit
+ebtables -t filter -X Cmcc_Guest_link_web_Limit
+iptables -t filter -D INPUT -j Cmcc_Guest_link_web_Limit
+iptables -t filter -D FORWARD -j Cmcc_Guest_link_web_Limit
+iptables -t filter -F Cmcc_Guest_link_web_Limit
+iptables -t filter -X Cmcc_Guest_link_web_Limit
+
+ebtables -t filter -N Cmcc_Guest_link_web_Limit
+ebtables -t filter -P Cmcc_Guest_link_web_Limit RETURN
+ebtables -t filter -I INPUT -j Cmcc_Guest_link_web_Limit
+iptables -t filter -N Cmcc_Guest_link_web_Limit
+iptables -t filter -I INPUT -j Cmcc_Guest_link_web_Limit
+iptables -t filter -I FORWARD -j Cmcc_Guest_link_web_Limit
+
+MESH_STATUS=$(ubus call cmap.mesh get | grep status | cut -d ' ' -f 2)
+[[ -z "${MESH_STATUS}" ]] && MESH_STATUS="0"
+MESH_ROLE_CFG=$(datconf -f /etc/map/mapd_cfg get DeviceRole)
+MESH_ROLE_CUR=$(/usr/bin/mapd_cli /tmp/mapd_ctrl getrole | awk '/dev_role/ {print $2}')
+MESH_MAPMODE=$(datconf -I 0 get MapMode)
+MESH_CONNECT_TYPE=$(mapd_cli /tmp/mapd_ctrl  bh_conn_type |grep "backhaul connection Type" |cut -d ' ' -f 4)
+MODE_TYPE=$(uci get system.wancfg.mode_type)
+
+echo -e "\e[1;30;46m>>>>>> firewall_guest_wifi_rule MODE_TYPE=[${MODE_TYPE}] MESH_STATUS=[${MESH_STATUS}] MESH_ROLE=[${MESH_ROLE_CFG}:${MESH_ROLE_CUR}] MESH_CONNECT_TYPE=[${MESH_CONNECT_TYPE}] >>>>>> $*\e[0m"
+
+if [[ "${MODE_TYPE}" == "2" ]]; then
+    PHYSDEV=apcli+
+elif [[ "${MESH_STATUS}" != "0" ]] && [[ "${MESH_ROLE_CUR}" == "2" ]] && [[ "${MESH_CONNECT_TYPE}" != "3" ]]; then
+    PHYSDEV=apcli+
+else
+    PHYSDEV=eth+
+fi
+
+ebtables -A Cmcc_Guest_link_Limit -i ra2 -o! $PHYSDEV -j DROP
+ebtables -A Cmcc_Guest_link_Limit -i rax2 -o! $PHYSDEV -j DROP
+ebtables -A Cmcc_Guest_link_Limit -i! $PHYSDEV -o ra2 -j DROP
+ebtables -A Cmcc_Guest_link_Limit -i! $PHYSDEV -o rax2 -j DROP
+iptables -A Cmcc_Guest_link_Ip_Limit  -m physdev --physdev-in ra2 ! --physdev-out $PHYSDEV -j DROP
+iptables -A Cmcc_Guest_link_Ip_Limit -m physdev ! --physdev-in $PHYSDEV --physdev-out ra2 -j DROP
+iptables -A Cmcc_Guest_link_Ip_Limit -m physdev --physdev-in rax2 ! --physdev-out $PHYSDEV -j DROP
+iptables -A Cmcc_Guest_link_Ip_Limit -m physdev ! --physdev-in $PHYSDEV --physdev-out rax2 -j DROP
+ip6tables -A Cmcc_Guest_link_Ip_Limit -m physdev --physdev-in ra2 ! --physdev-out $PHYSDEV -j DROP
+ip6tables -A Cmcc_Guest_link_Ip_Limit -m physdev ! --physdev-in $PHYSDEV --physdev-out ra2 -j DROP
+ip6tables -A Cmcc_Guest_link_Ip_Limit -m physdev --physdev-in rax2 ! --physdev-out $PHYSDEV -j DROP
+ip6tables -A Cmcc_Guest_link_Ip_Limit -m physdev ! --physdev-in $PHYSDEV --physdev-out rax2 -j DROP
+
+ebtables -A Cmcc_Guest_link_web_Limit -i ra2 -p ipv4 --ip-dst 192.168.10.1 --ip-proto tcp --ip-destination-port 80 -j DROP
+ebtables -A Cmcc_Guest_link_web_Limit -i rax2 -p ipv4 --ip-dst 192.168.10.1 --ip-proto tcp --ip-destination-port 80 -j DROP
+iptables -A Cmcc_Guest_link_web_Limit -m physdev --physdev-in ra2 -d 192.168.10.1 -p tcp --dport 80 -j DROP
+iptables -A Cmcc_Guest_link_web_Limit -m physdev --physdev-in rax2 -d 192.168.10.1 -p tcp --dport 80 -j DROP
+
+ip=$(cat /tmp/ip.br-lan)
+if [ -n "$ip" ]; then
+iptables -A Cmcc_Guest_link_web_Limit -m physdev --physdev-in ra2 -d $ip -p tcp --dport 80 -j DROP
+iptables -A Cmcc_Guest_link_web_Limit -m physdev --physdev-in rax2 -d $ip -p tcp --dport 80 -j DROP
+fi

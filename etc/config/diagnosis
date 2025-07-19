@@ -1,0 +1,13 @@
+config log 'log'
+	option enable '0'
+	option timeout '10'
+	option log_path '/apvar/log/cmdc.log'
+	option log_level 0
+
+config ping 'ping'
+	option host 'www.baidu.com'
+	option num '0'
+
+config traceroute 'traceroute'
+	option host 'www.baidu.com'
+	option port '80'

@@ -1,0 +1,67 @@
+# locknet
+
+LOCKNET_ENABLE=$(uci get platform.wifidog.enable)
+
+STUNNEL_ENABLE=$(uci get stunnel.dummy.enabled)
+
+# WAN_MODE: 0 - route / 1 - bridge / 2 - repeater
+WAN_MODE=$(uci get system.wancfg.mode_type)
+
+if [ "$LOCKNET_ENABLE" = "1" ]; then
+        echo start locknet...
+        
+        # start stunnel
+        if [ "$STUNNEL_ENABLE" != "1" ];then
+        	uci set stunnel.dummy.enabled='1'
+                uci commit stunnel
+        fi
+        /etc/init.d/stunnel restart
+
+        ebtables -t filter -F locknet_rules
+        ebtables -t filter -D FORWARD -j locknet_rules
+        ebtables -t filter -X locknet_rules
+
+        ebtables -t filter -N locknet_rules
+        ebtables -t filter -P locknet_rules RETURN
+        ebtables -t filter -I FORWARD -j locknet_rules
+
+
+        if [ "$WAN_MODE" = "0" ]; then
+                iptables -t filter -A forwarding_rule -p udp -m udp --dport 67 -j ACCEPT
+                iptables -t filter -A forwarding_rule -p udp -m udp --dport 68 -j ACCEPT
+                iptables -t filter -A forwarding_rule -o eth1 -j DROP
+                ip6tables -t filter -A forwarding_rule -o eth1 -j DROP
+        elif [ "$WAN_MODE" = "1" ]; then
+                ebtables -A locknet_rules -o eth+ -p arp -j ACCEPT
+                ebtables -A locknet_rules -o eth+ -p IPv4 --ip-proto 17 --ip-dport 67 -j ACCEPT
+                ebtables -A locknet_rules -o eth+ -j DROP
+        elif [ "$WAN_MODE" = "2" ]; then
+                ebtables -A locknet_rules -o apcli+ -p arp -j ACCEPT
+                ebtables -A locknet_rules -o apcli+ -p IPv4 --ip-proto 17 --ip-dport 67 -j ACCEPT
+                ebtables -A locknet_rules -o apcli+ -j DROP
+        fi
+
+        # ipv4
+        IPV4_ADDR=$(ifconfig br-lan | awk '/inet addr/ {print $2}' | cut -f2 -d ":")
+        iptables -t nat -I PREROUTING -i br-lan -p tcp --dport 80 -j DNAT --to-destination ${IPV4_ADDR}
+        iptables -t nat -I PREROUTING -i br-lan -p tcp --dport 443 -j DNAT --to-destination ${IPV4_ADDR}
+        iptables -t nat -I PREROUTING -i br-lan -p udp --dport 53 -j DNAT --to-destination ${IPV4_ADDR}
+
+        # ipv6
+        IPV6_ADDR=$(ifconfig br-lan | grep Scope:Link |  awk '/inet6 addr/ {print $3}' | cut -f1 -d "/")
+        ip6tables -t nat -I PREROUTING -i br-lan -p tcp --dport 80 -j DNAT --to-destination ${IPV6_ADDR}
+        ip6tables -t nat -I PREROUTING -i br-lan -p tcp --dport 443 -j DNAT --to-destination ${IPV6_ADDR}
+        ip6tables -t nat -I PREROUTING -i br-lan -p udp --dport 53 -j DNAT --to-destination ${IPV6_ADDR}
+else
+        ebtables -t filter -F locknet_rules
+        ebtables -t filter -D FORWARD -j locknet_rules
+        ebtables -t filter -X locknet_rules
+
+        # stop stunnel
+        if [ "$STUNNEL_ENABLE" != "0" ];then
+        	uci set stunnel.dummy.enabled='0'
+                uci commit stunnel
+        fi
+        /etc/init.d/stunnel restart
+fi
+

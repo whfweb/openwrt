@@ -1,0 +1,9 @@
+ebtables -F device_limit
+ebtables -D INPUT -j device_limit
+ebtables -D FORWARD -j device_limit
+ebtables -D OUTPUT -j device_limit
+ebtables -X device_limit
+ebtables -N device_limit -P RETURN
+ebtables -I INPUT  -j device_limit
+ebtables -I FORWARD -j device_limit
+ebtables -I OUTPUT -j device_limit

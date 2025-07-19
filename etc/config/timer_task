@@ -1,0 +1,10 @@
+
+config task
+	option action 'ToReboot'
+	option ssid_index '0'
+	option time_offset '16860'
+	option time_offset2 '0'
+	option week '32'
+	option enable '1'
+	option ui_flag '0'
+

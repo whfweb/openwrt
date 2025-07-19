@@ -1,0 +1,1 @@
+41 4 * * 5 /usr/bin/timer_reboot 0 &

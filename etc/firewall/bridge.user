@@ -1,0 +1,126 @@
+# dnat 192.168.10.1 to br-lan in bridge mode
+
+/usr/bin/input_icmp_filter.sh del
+MODE_TYPE=$(uci get system.wancfg.mode_type)
+echo -e "\e[1;30;46m>>>>>> bridge.user MODE_TYPE=[${MODE_TYPE}] >>>>>> $*\e[0m"
+
+if [[ "${MODE_TYPE}" != "0" ]]; then
+	BR_IPADDR=$(ifconfig br-lan | grep -Eo '[0-9]{1,3}(\.[0-9]{1,3}){3}' | head -1)
+	[[ -z "${BR_IPADDR}" ]] && BR_IPADDR=$(cat /tmp/ip.br-lan)
+	echo -e "\e[1;30;46m>>>>>> bridge.user BR_IPADDR=[${BR_IPADDR}] >>>>>> $*\e[0m"
+
+	ALIAS_IPADDR=$(uci -q get network.alias.ipaddr)
+	#[[ -z "${ALIAS_IPADDR}" ]] && ALIAS_IPADDR=$(uci -q get network.alias.ipaddr)
+	[[ -z "${ALIAS_IPADDR}" ]] && ALIAS_IPADDR="192.168.10.1"
+	echo -e "\e[1;30;46m>>>>>> bridge.user ALIAS_IPADDR=[${ALIAS_IPADDR}] >>>>>> $*\e[0m"
+	ALIAS1_IPADDR="192.168.10.1"
+
+	# MESH_STATUS: 0-组网未成功 1-组网成功 2-曾经组网成功
+	MESH_STATUS=$(ubus call cmap.mesh get | grep status | cut -d ' ' -f 2)
+	[[ -z "${MESH_STATUS}" ]] && MESH_STATUS="0"
+	MESH_ROLE_CFG=$(datconf -f /etc/map/mapd_user.cfg get DeviceRole)
+	MESH_ROLE_CUR=$(/usr/bin/mapd_cli /tmp/mapd_ctrl getrole | awk '/dev_role/ {print $2}')
+	echo -e "\e[1;30;46m>>>>>> bridge.user MESH_ROLE=[${MESH_ROLE_CFG}:${MESH_ROLE_CUR}] >>>>>> $*\e[0m"
+
+	DNSTRAP=$(cat /proc/ch_dnstrap/enable)
+	MESH_MAPMODE=$(datconf -I 0 get MapMode)
+	if [[ -n "${BR_IPADDR}" ]] && [[ "${BR_IPADDR}" != "${ALIAS_IPADDR}" ]]; then
+		SAMBA_ENABLE=$(uci get samba.@samba[0].enable)
+		if [[ "${MESH_ROLE_CFG}" != "2" ]] && [[ "${MESH_ROLE_CUR}" != "2" ]]; then
+			# iptables -t nat -I PREROUTING -d ${ALIAS_IPADDR} -j DNAT --to-destination ${BR_IPADDR}
+			iptables -t nat -I PREROUTING -d ${ALIAS_IPADDR} -p tcp --dport 80 -j DNAT --to-destination ${BR_IPADDR}:80
+			echo -e "\e[1;30;46m>>>>>> bridge.user iptables add dnat [-d ${ALIAS_IPADDR} --to-destination ${BR_IPADDR}:80] >>>>>> $*\e[0m" > /dev/console
+			
+			if [[ "${SAMBA_ENABLE}" == "1" ]]; then
+				iptables -t nat -A PREROUTING -d ${ALIAS_IPADDR} -p tcp --dport 139 -j DNAT --to-destination ${BR_IPADDR}:139
+				iptables -t nat -A PREROUTING -d ${ALIAS_IPADDR} -p tcp --dport 445 -j DNAT --to-destination ${BR_IPADDR}:445
+				echo -e "\e[1;30;46m>>>>>> bridge.user iptables add dnat [-d ${ALIAS_IPADDR} --to-destination ${BR_IPADDR}:139/445] >>>>>> $*\e[0m" > /dev/console			
+			fi
+		else
+			if [[ "${MESH_STATUS}" != "1" ]] || [[ "${MESH_MAPMODE}" == "0" ]]; then
+				iptables -t nat -I PREROUTING -d ${ALIAS_IPADDR} -p tcp --dport 80 -j DNAT --to-destination ${BR_IPADDR}:80
+			fi
+		fi
+
+		GUEST_ENABLE=$(uci get cmdc_wifi.guest.controlenable)
+		echo -e "\e[1;30;46m>>>>>> bridge.user GUEST_ENABLE=[${GUEST_ENABLE}] >>>>>> $*\e[0m"
+
+		if [[ "${GUEST_ENABLE}" == "1" ]]; then
+			iptables -A Cmcc_Guide_link_web_Limit -m physdev --physdev-in ra2 -d ${BR_IPADDR} -p tcp --dport 80 -j DROP
+			iptables -A Cmcc_Guide_link_web_Limit -m physdev --physdev-in rax2 -d ${BR_IPADDR} -p tcp --dport 80 -j DROP
+			if [[ "${SAMBA_ENABLE}" == "1" ]]; then
+				iptables -A Cmcc_Guide_link_web_Limit -m physdev --physdev-in ra2 -d ${BR_IPADDR} -p tcp --dport 139 -j DROP
+				iptables -A Cmcc_Guide_link_web_Limit -m physdev --physdev-in rax2 -d ${BR_IPADDR} -p tcp --dport 139 -j DROP	
+				iptables -A Cmcc_Guide_link_web_Limit -m physdev --physdev-in ra2 -d ${BR_IPADDR} -p tcp --dport 445 -j DROP
+				iptables -A Cmcc_Guide_link_web_Limit -m physdev --physdev-in rax2 -d ${BR_IPADDR} -p tcp --dport 445 -j DROP				
+			fi
+		fi
+
+		FIREWALL_LEVEL=$(uci get security.firewall.level)
+		echo -e "\e[1;30;46m>>>>>> bridge.user FIREWALL_LEVEL=[${FIREWALL_LEVEL}] >>>>>> $*\e[0m"
+
+		if [[ -n "${FIREWALL_LEVEL}" ]] && [[ "${FIREWALL_LEVEL}" != "low" ]]; then
+			if [[ "${MESH_ROLE_CUR}" != "2" ]] || [[ "$MESH_STATUS" != "1" ]]; then
+				# 非组网成功的从路由才生效禁止ping包的规则（fix bug7093）
+				iptables -t mangle -I PREROUTING -p icmp --icmp-type 8 -m physdev --physdev-in eth1  -j DROP
+				# 解决wan口禁ping时ping包概率会漏过防火墙的问题（fix bug8305）
+				/usr/bin/input_icmp_filter.sh add
+			fi
+		fi
+	fi
+
+	if [[ "${ALIAS_IPADDR}" != "${ALIAS1_IPADDR}" ]] && [[ "${BR_IPADDR}" != "${ALIAS1_IPADDR}" ]]; then
+		iptables -t nat -I PREROUTING -d ${ALIAS1_IPADDR} -p tcp --dport 80 -j DNAT --to-destination ${BR_IPADDR}:80
+		echo -e "\e[1;30;46m>>>>>> bridge.user iptables add dnat [-d ${ALIAS1_IPADDR} --to-destination ${BR_IPADDR}:80] >>>>>> $*\e[0m" > /dev/console
+	fi
+
+	if [[ "${MESH_STATUS}" != "1" ]] || [[ "${MESH_MAPMODE}" == "0" ]]; then
+		if [[ "${DNSTRAP}" == "0" ]]; then
+			echo 1 > /proc/ch_dnstrap/enable
+		fi
+	elif [[ "${MESH_ROLE_CFG}" == "2" ]] || [[ "${MESH_ROLE_CUR}" == "2" ]]; then
+		if [[ "${DNSTRAP}" == "1" ]]; then
+			echo 0 > /proc/ch_dnstrap/enable
+		fi
+		echo 0 > /sys/class/net/br-lan/bridge/multicast_querier
+		echo 0 > /sys/class/net/br-lan/bridge/multicast_snooping
+	else
+		if [[ "${DNSTRAP}" == "0" ]]; then
+			echo 1 > /proc/ch_dnstrap/enable
+		fi
+	fi
+else
+	WAN_IPADDR=$(ifconfig eth1 | grep -Eo '[0-9]{1,3}(\.[0-9]{1,3}){3}' | head -1)
+	echo -e "\e[1;30;46m>>>>>> bridge.user WAN_IPADDR=[${WAN_IPADDR}] >>>>>> $*\e[0m"
+
+	if [[ -n "${WAN_IPADDR}" ]]; then
+		iptables -I INPUT -d ${WAN_IPADDR} -p tcp --dport 80 -j DROP
+	fi
+
+	LAN_IPADDR=$(uci -q get network.lan.ipaddr)
+	ALIAS_IPADDR=$(uci -q get network.alias.ipaddr)
+	ALIAS1_IPADDR="192.168.10.1"
+	[[ -z "${ALIAS_IPADDR}" ]] && ALIAS_IPADDR="192.168.10.1"
+	if [[ "${LAN_IPADDR}" != "${ALIAS_IPADDR}" ]]; then
+		iptables -t nat -I PREROUTING -d ${ALIAS_IPADDR} -p tcp --dport 80 -j DNAT --to-destination ${LAN_IPADDR}:80
+	fi
+	if [[ "${ALIAS_IPADDR}" != "${ALIAS1_IPADDR}" ]] && [[ "${LAN_IPADDR}" != "${ALIAS1_IPADDR}" ]]; then
+		iptables -t nat -I PREROUTING -d ${ALIAS1_IPADDR} -p tcp --dport 80 -j DNAT --to-destination ${LAN_IPADDR}:80
+	fi
+fi
+
+#PROVINCE_CODE=$(cfm_tools get_andlink_province_code 2>/dev/null)
+#if [[ "${PROVINCE_CODE}" == "SCH" ]]; then
+#	DROP_ICMP_TYPE="131 132 143"
+#	IPTV_ENABLED=$(uci -q get service.iptv.enabled)
+#	for icmptype in ${DROP_ICMP_TYPE}; do
+#		ip6tables -t mangle -D POSTROUTING -p icmpv6 --icmpv6-type ${icmptype} -m physdev --physdev-out eth1 -j DROP
+#	done
+#	# iptables -t mangle -D POSTROUTING -p igmp -m physdev --physdev-out eth1 -j DROP
+#	if [[ "${IPTV_ENABLED}" != "0" ]] && [[ "${MODE_TYPE}" != "0" ]]; then
+#		for icmptype in ${DROP_ICMP_TYPE}; do
+#			ip6tables -t mangle -I POSTROUTING -p icmpv6 --icmpv6-type ${icmptype} -m physdev --physdev-out eth1 -j DROP
+#		done
+#		iptables -t mangle -I POSTROUTING -p igmp -m physdev --physdev-out eth1 -j DROP
+#	fi
+#fi

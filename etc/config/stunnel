@@ -1,0 +1,13 @@
+config globals 'globals'
+	#option alt_config_file '/etc/stunnel/stunnel.conf'
+	option setuid 'nobody'
+	option setgid 'nogroup'
+
+config service 'dummy'
+        option enabled '0'
+        option client '0'
+        option accept_host '0.0.0.0'
+        option accept_port '443'
+        option cert '/etc/stunnel/stunnel.pem'
+        option connect 'localhost:80'
+

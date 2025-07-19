@@ -1,0 +1,9 @@
+config wifidog 'wifidog'
+	option enable '0'
+
+config hardspeed 'hardspeed'
+	option enable '1'
+	option count '30'
+
+config ipv6 'ipv6'
+	option disabled '0'

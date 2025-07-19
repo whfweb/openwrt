@@ -1,0 +1,31 @@
+############################################################
+# security firewall config:
+#     firewall enable: 1
+#     firewall level: high
+#     firewall dmz: 0
+#     firewall dmz ip: 0.0.0.0
+
+echo 0 > /proc/sys/net/ipv4/conf/all/accept_source_route
+
+echo 1 > /proc/sys/net/ipv4/tcp_syncookies
+
+echo 1 > /proc/sys/net/ipv4/icmp_ignore_bogus_error_responses
+
+echo 6169 > /proc/sys/net/ipv4/icmp_ratemask
+echo 100 > /proc/sys/net/ipv4/icmp_ratelimit
+
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
+
+
+############################################################
+# mac filter
+/etc/init.d/mac_filter restart
+############################################################
+# url filter
+#  switch : 1
+iptables -w -t mangle -N "dns_filter"
+iptables -w -t mangle -I PREROUTING -j "dns_filter"
+ip6tables -w -t mangle -N "dns_filter"
+ip6tables -w -t mangle -I PREROUTING -j "dns_filter"
+
+

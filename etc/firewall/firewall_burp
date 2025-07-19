@@ -1,0 +1,57 @@
+##### WAN security ####
+
+#判断设备是否为组网成功的子机
+device_is_mesh_agent_and_connectted_succ() {
+	local mesh_cfg_save_f="/tmp/mesh_cfg"
+
+	ubus call cmap.mesh get > $mesh_cfg_save_f
+	sed 's/cmap.//g' -i $mesh_cfg_save_f
+	local mesh_role=$(cat /tmp/mesh_cfg | jsonfilter -e '@.mesh.current_role' )
+	if [[ $mesh_role -ne 2 ]]; then
+		return 1
+	fi
+
+	local connect_status=$(cat /tmp/mesh_cfg | jsonfilter -e '@.mesh.status')
+	if [[ $connect_status -ne 1 ]]; then
+		return 1
+	fi
+
+	#mesh_role==2 connect_status==1
+	return 0
+}
+
+WAN_MODE=$(uci -q get system.wancfg.mode_type)
+WAN_VISIT_ENABLE=$(uci -q get security.firewall.wanvisit_enable)
+if [ "$WAN_MODE" = "2" ]; then
+    WAN_IFNAME="apcli+"
+else
+    WAN_IFNAME="eth1"
+fi
+
+ebtables -t filter -F wan_securiry_rules
+ebtables -t filter -D INPUT -j wan_securiry_rules
+ebtables -t filter -X wan_securiry_rules
+
+ebtables -t filter -N wan_securiry_rules
+ebtables -t filter -P wan_securiry_rules RETURN
+ebtables -t filter -I INPUT -j wan_securiry_rules
+
+#组网成功的子机不设置wan口的web和telnet访问限制
+if [[ "$WAN_VISIT_ENABLE" != "1" ]] && ! device_is_mesh_agent_and_connectted_succ;then
+    ebtables -A wan_securiry_rules -i ${WAN_IFNAME} -p IPv4 --ip-proto 6 --ip-dport 80 -j DROP
+    ebtables -A wan_securiry_rules -i ${WAN_IFNAME} -p IPv4 --ip-proto 6 --ip-dport 443 -j DROP
+    ebtables -A wan_securiry_rules -i ${WAN_IFNAME} -p IPv4 --ip-proto 6 --ip-dport 23 -j DROP
+    ebtables -A wan_securiry_rules -i ${WAN_IFNAME} -p IPv4 --ip-proto 6 --ip-dport 4869 -j DROP
+    ebtables -A wan_securiry_rules -i ${WAN_IFNAME} -p IPv6 --ip6-dst ::/0 --ip6-proto 6 --ip6-dport 80 -j DROP
+    ebtables -A wan_securiry_rules -i ${WAN_IFNAME} -p IPv6 --ip6-dst ::/0 --ip6-proto 6 --ip6-dport 443 -j DROP
+    ebtables -A wan_securiry_rules -i ${WAN_IFNAME} -p IPv6 --ip6-dst ::/0 --ip6-proto 6 --ip6-dport 23 -j DROP
+    ebtables -A wan_securiry_rules -i ${WAN_IFNAME} -p IPv6 --ip6-dst ::/0 --ip6-proto 6 --ip6-dport 4869 -j DROP
+fi
+
+ebtables -A wan_securiry_rules -i ${WAN_IFNAME} -p IPv4 --ip-proto 6 --ip-dport 22 -j DROP
+ebtables -A wan_securiry_rules -i ${WAN_IFNAME} -p IPv4 --ip-proto 6 --ip-dport 21 -j DROP
+ebtables -A wan_securiry_rules -i ${WAN_IFNAME} -p IPv6 --ip6-dst ::/0 --ip6-proto 6 --ip6-dport 22 -j DROP
+ebtables -A wan_securiry_rules -i ${WAN_IFNAME} -p IPv6 --ip6-dst ::/0 --ip6-proto 6 --ip6-dport 21 -j DROP
+
+# burp
+iptables -I input_rule -p tcp -m string --algo kmp --string "http://burp" --dport 80 -j DROP

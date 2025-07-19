@@ -1,0 +1,63 @@
+
+config system 'cmdc'
+	option zonename 'UTC-8'
+	option timezone '<+08>-8'
+	option ttylogin '0'
+	option log_size '1024'
+	option log_file '/var/log/cmdc.sys.log'
+	option log_type 'circular'
+	option log_pattern 'cmapd|cmdc_monitor|cmdc_lanhost|cmdc_dhcplease'
+	option urandom_seed '0'
+	option hostname 'RAX3000M'
+	option firstboot_done '1'
+
+config timeserver 'ntp'
+	option enabled '1'
+	option enable_server '0'
+	list server 'ntp.ntsc.ac.cn'
+	list server 'cn.ntp.org.cn'
+	list server 'ntp.tencent.com'
+	list server 'ntp.aliyun.com'
+	option status '0'
+	option interval '86400'
+
+config mesh 'mesh'
+	option type 'easymesh'
+	option role 'none'
+	option vaps_per_radio '4'
+	option init_done '1'
+	option onboarding '0'
+
+config wan_adapt 'wan_adapt'
+	option mode '0'
+	option index '1'
+
+config wancfg 'wancfg'
+	option protocoltype '0'
+	option dns_enabled '0'
+	option mode_type '0'
+
+config ledAllCtrl 'ledAllCtrl'
+	option action 'on'
+
+config fotainfo 'fotainfo'
+	option enabled '1'
+	option checkaddr 'https://niot-mrg.chinamobiledevice.com:11443/device-api/device/check-upgrade'
+	option reportaddr 'https://niot-mrg.chinamobiledevice.com:11443/device-api/device/upgrade-progress'
+	option conf_url 'https://ivs-ota.chinamobiledevice.com:11443/iotplat-gateway/open-api/fota/upgrade/settings'
+	option firmware_path '/tmp/fota_firmware'
+	option socket_path '/tmp/fota_socket'
+	option flag '0'
+
+config fotafunc 'fotafunc'
+	option upgraderesult '0'
+	option queryresult '0'
+	option verflag '0'
+
+config hemiaozj 'hemiaozj'
+
+config telnet 'telnet'
+	option enabled '0'
+
+config emmc 'flash_type'
+

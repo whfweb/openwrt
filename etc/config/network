@@ -1,0 +1,69 @@
+
+config interface 'loopback'
+	option device 'lo'
+	option proto 'static'
+	option ipaddr '127.0.0.1'
+	option netmask '255.0.0.0'
+
+config device
+	option name 'br-lan'
+	option type 'bridge'
+	list ports 'lan1'
+	list ports 'lan2'
+	list ports 'lan3'
+
+config device
+	option name 'lan1'
+	option macaddr 'C8:75:F4:69:51:BC'
+
+config device
+	option name 'lan2'
+	option macaddr 'C8:75:F4:69:51:BD'
+
+config device
+	option name 'lan3'
+	option macaddr 'C8:75:F4:69:51:BE'
+
+config interface 'lan'
+	option device 'br-lan'
+	option ipaddr '192.168.10.1'
+	option netmask '255.255.255.0'
+	option ip6assign '60'
+	option hostname 'RAX3000M-51B9'
+	option proto 'static'
+
+config device
+	option name 'eth1'
+	option macaddr 'c8:75:f4:69:51:b9'
+
+config interface 'wan'
+	option device 'eth1'
+	option hostname 'RAX3000M-51B9'
+	option disabled '0'
+	option username '13972262765'
+	option password '888888'
+	option mtu '1492'
+	option peerdns '1'
+	option proto 'dhcp'
+
+config interface 'wan6'
+	option device 'eth1'
+	option proto 'dhcpv6'
+	option disabled '0'
+	option ipv6prefixOrigin '0'
+	option peerdns '1'
+	option nat6 '0'
+
+config interface 'alias'
+	option device 'br-lan'
+	option proto 'static'
+	option ipaddr '192.168.10.1'
+	option netmask '255.255.255.0'
+	option disabled '1'
+	option ignore '1'
+
+config interface 'lan6'
+	option device 'br-lan'
+	option proto 'dhcpv6'
+	option disabled '1'
+

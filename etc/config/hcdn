@@ -1,0 +1,84 @@
+config outdisk 'outdisk0'
+    option path '/mnt'
+    option hcdn '0'
+    option hcdnmaxsize '0'
+
+
+config outdisk 'outdisk1'
+    option path '/mnt'
+    option hcdn '0'
+    option hcdnmaxsize '0'
+
+config outdisk 'outdisk2'
+    option path '/mnt'
+    option hcdn '0'
+    option hcdnmaxsize '0'
+
+
+config outdisk 'outdisk3'
+    option path '/mnt'
+    option hcdn '0'
+    option hcdnmaxsize '0'
+
+
+config outdisk 'outdisk4'
+    option path '/mnt'
+    option hcdn '0'
+    option hcdnmaxsize '0'
+
+
+config outdisk 'outdisk5'
+    option path '/mnt'
+    option hcdn '0'
+    option hcdnmaxsize '0'
+
+config outdisk 'outdisk6'
+    option path '/mnt'
+    option hcdn '0'
+    option hcdnmaxsize '0'
+
+
+config outdisk 'outdisk7'
+    option path '/mnt'
+    option hcdn '0'
+    option hcdnmaxsize '0'
+    
+# config outdisk
+#     option 'path' '/mnt'
+#     option 'hcdn' '0'
+#     option 'hcdnmaxsize' '0'
+
+# config outdisk
+#     option 'path' '/mnt'
+#     option 'hcdn' '0'
+#     option 'hcdnmaxsize' '0'
+
+# config outdisk
+#     option 'path' '/mnt'
+#     option 'hcdn' '0'
+#     option 'hcdnmaxsize' '0'
+
+# config outdisk
+#     option 'path' '/mnt'
+#     option 'hcdn' '0'
+#     option 'hcdnmaxsize' '0'
+
+# config outdisk
+#     option 'path' '/mnt'
+#     option 'hcdn' '0'
+#     option 'hcdnmaxsize' '0'
+
+# config outdisk
+#     option 'path' '/mnt'
+#     option 'hcdn' '0'
+#     option 'hcdnmaxsize' '0'
+
+# config outdisk
+#     option 'path' '/mnt'
+#     option 'hcdn' '0'
+#     option 'hcdnmaxsize' '0'
+
+# config outdisk
+#     option 'path' '/mnt'
+#     option 'hcdn' '0'
+#     option 'hcdnmaxsize' '0'

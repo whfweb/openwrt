@@ -1,0 +1,14 @@
+
+config login_pre 'login_pre'
+	option login_lock_sec '60'
+	option login_total_times '5'
+	option session_id ' '
+	option level '3'
+	option first_login '1'
+	option token '-1847459496'
+	option login_remain_times '5'
+
+config userinfo 'user'
+	option username 'user'
+	option passwd 'UJi!mV2m'
+
