@@ -175,7 +175,30 @@ function setup() {
 
 	log('Starting');
 
-	validate('device', data.config);
+	let config = data.config;
+
+	if (!config.band) {
+		switch (config.hwmode) {
+		case 'a':
+		case '11a':
+			config.band = '5g';
+			break;
+		case 'ad':
+		case '11ad':
+			config.band = '60g';
+			break;
+		case 'b':
+		case 'g':
+		case '11b':
+		case '11g':
+		default:
+			config.band = '2g';
+			break;
+		}
+	}
+	delete config.hwmode;
+
+	validate('device', config);
 	setup_phy(data.phy, data.config, data.data);
 
 	let supplicant_mesh;
@@ -202,6 +225,8 @@ function setup() {
 		switch (mode) {
 		case 'ap':
 			has_ap = true;
+			for (let _, sta in v.stas)
+				validate('station', sta.config);
 			// fallthrough
 		case 'sta':
 		case 'adhoc':
@@ -225,6 +250,7 @@ function setup() {
 				break;
 			// fallthrough
 		case 'sta':
+			data.ap_start_disabled = true;
 			let config = supplicant.generate(supplicant_data, data, v);
 			if (mode == "mesh")
 				config_add_mesh_params(config, v.config);
@@ -258,11 +284,8 @@ function setup() {
 		wdev_data[v.config.ifname] = config;
 	}
 
-	if (length(supplicant_data) > 0)
-		supplicant.setup(supplicant_data, data);
-
-	if (has_ap)
-		hostapd.setup(data);
+	supplicant.setup(supplicant_data, data);
+	hostapd.setup(data);
 
 	system(`ucode /usr/share/hostap/wdev.uc ${data.phy}${data.phy_suffix} set_config '${printf("%J", wdev_data)}' ${join(' ', active_ifnames)}`);
 
@@ -276,6 +299,9 @@ function setup() {
 
 function teardown() {
 	let data = json(ARGV[3]);
+
+	if (ARGV[2] == "#mlo")
+		return 0;
 
 	if (!data.data?.phy) {
 		log('Bug: PHY is undefined for device');

@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
-PKG_VERSION:=2025.07
-PKG_HASH:=0f933f6c5a426895bf306e93e6ac53c60870e4b54cda56d95211bec99e63bec7
+PKG_VERSION:=2025.10
+PKG_HASH:=b4f032848e56cc8f213ad59f9132c084dbbb632bc29176d024e58220e0efdf4a
 PKG_BUILD_DEPENDS:=!(TARGET_ramips||TARGET_mediatek_mt7623):arm-trusted-firmware-tools/host
 
 UBOOT_USE_INTREE_DTC:=1
@@ -243,7 +243,19 @@ define U-Boot/mt7981_cmcc_a10
   DEPENDS:=+trusted-firmware-a-mt7981-spim-nand-ddr3
 endef
 
-define U-Boot/mt7981_cmcc_rax3000m-emmc
+define U-Boot/mt7981_cmcc_rax3000m-emmc-ddr3
+  NAME:=CMCC RAX3000M
+  BUILD_SUBTARGET:=filogic
+  BUILD_DEVICES:=cmcc_rax3000m
+  UBOOT_CONFIG:=mt7981_cmcc_rax3000m-emmc
+  UBOOT_IMAGE:=u-boot.fip
+  BL2_BOOTDEV:=emmc
+  BL2_SOC:=mt7981
+  BL2_DDRTYPE:=ddr3-1866mhz
+  DEPENDS:=+trusted-firmware-a-mt7981-emmc-ddr3-1866mhz
+endef
+
+define U-Boot/mt7981_cmcc_rax3000m-emmc-ddr4
   NAME:=CMCC RAX3000M
   BUILD_SUBTARGET:=filogic
   BUILD_DEVICES:=cmcc_rax3000m
@@ -255,7 +267,19 @@ define U-Boot/mt7981_cmcc_rax3000m-emmc
   DEPENDS:=+trusted-firmware-a-mt7981-emmc-ddr4
 endef
 
-define U-Boot/mt7981_cmcc_rax3000m-nand
+define U-Boot/mt7981_cmcc_rax3000m-nand-ddr3
+  NAME:=CMCC RAX3000M
+  BUILD_SUBTARGET:=filogic
+  BUILD_DEVICES:=cmcc_rax3000m
+  UBOOT_CONFIG:=mt7981_cmcc_rax3000m-nand
+  UBOOT_IMAGE:=u-boot.fip
+  BL2_BOOTDEV:=spim-nand
+  BL2_SOC:=mt7981
+  BL2_DDRTYPE:=ddr3-1866mhz
+  DEPENDS:=+trusted-firmware-a-mt7981-spim-nand-ddr3-1866mhz
+endef
+
+define U-Boot/mt7981_cmcc_rax3000m-nand-ddr4
   NAME:=CMCC RAX3000M
   BUILD_SUBTARGET:=filogic
   BUILD_DEVICES:=cmcc_rax3000m
@@ -916,8 +940,10 @@ UBOOT_TARGETS := \
 	mt7629_rfb \
 	mt7981_abt_asr3000 \
 	mt7981_cmcc_a10 \
-	mt7981_cmcc_rax3000m-emmc \
-	mt7981_cmcc_rax3000m-nand \
+	mt7981_cmcc_rax3000m-emmc-ddr3 \
+	mt7981_cmcc_rax3000m-emmc-ddr4 \
+	mt7981_cmcc_rax3000m-nand-ddr3 \
+	mt7981_cmcc_rax3000m-nand-ddr4 \
 	mt7981_cudy_tr3000-v1 \
 	mt7981_gatonetworks_gdsp \
 	mt7981_glinet_gl-mt2500 \
