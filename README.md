@@ -26,7 +26,8 @@ git clone -b master  https://github.com/whfweb/openwrt.git
    
 cd openwrt
 
-（ 将对 ./openwrt 目录及其所有子目录中的文件添加读、写、执行权限：sudo chmod 777 -R ./test）
+sudo apt update
+sudo apt install build-essential libncurses5-dev gawk git libssl-dev gettext zlib1g-dev swig unzip time rsync python3 python3-setuptools
    
    ./scripts/feeds update -a
    
