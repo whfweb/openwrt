@@ -6,6 +6,7 @@ RAMFS_COPY_DATA='/etc/fw_env.config /var/lock/fw_printenv.lock'
 
 platform_check_image() {
 	case "$(board_name)" in
+	asus,map-ac1300|\
 	asus,rt-ac42u|\
 	asus,rt-ac58u)
 		local ubidev=$(nand_find_ubi $CI_UBIPART)
@@ -122,6 +123,8 @@ platform_do_upgrade() {
 	luma,wrtq-329acn|\
 	mobipromo,cm520-79f|\
 	netgear,lbr20|\
+	netgear,rbr20|\
+	netgear,rbs20|\
 	netgear,wac510|\
 	p2w,r619ac-64m|\
 	p2w,r619ac-128m|\
@@ -140,6 +143,7 @@ platform_do_upgrade() {
 		fi
 		nand_do_upgrade "$1"
 		;;
+	asus,map-ac1300|\
 	asus,map-ac2200|\
 	asus,rt-ac42u|\
 	asus,rt-ac58u)
@@ -165,6 +169,7 @@ platform_do_upgrade() {
 		;;
 	linksys,ea6350v3|\
 	linksys,ea8300|\
+	linksys,mr6350|\
 	linksys,mr8300|\
 	linksys,whw01|\
 	linksys,whw03v2)
