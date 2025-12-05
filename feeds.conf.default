@@ -8,4 +8,4 @@ src-git telephony https://github.com/openwrt/telephony.git
 #src-git telephony https://git.openwrt.org/feed/telephony.git
 #src-git small https://github.com/kenzok8/small.git
 #src-git smallpackage https://github.com/kenzok8/small-package.git
-src-git OpenClash https://github.com/vernesong/OpenClash.git
+https://github.com/whfweb/OpenClash.git
