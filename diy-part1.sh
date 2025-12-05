@@ -13,7 +13,7 @@
 #sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default
 
 cd package
-git clone https://github.com/rufengsuixing/luci-app-zerotier.git || true
+git clone https://github.com/rufengsuixing/luci-app-zerotier.git
 cd ..
 
 # Add a feed source
