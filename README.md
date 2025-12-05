@@ -72,6 +72,14 @@ make distclean
 
 ![OpenWrt logo](include/logo.png)
 
+# 检查ubuntu子系统当前代理设置
+echo $http_proxy
+echo $https_proxy
+
+# 如果没有设置，可以临时设置（端口9090是DevSidecar默认）
+export http_proxy=http://127.0.0.1:9090
+export https_proxy=http://127.0.0.1:9090
+
 OpenWrt Project is a Linux operating system targeting embedded devices. Instead
 of trying to create a single, static firmware, OpenWrt provides a fully
 writable filesystem with package management. This frees you from the
