@@ -87,3 +87,7 @@ unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
 echo "http_proxy=$http_proxy"
 echo "https_proxy=$https_proxy"
 # 应该显示空行
+明确清除所有代理设置（确保下载不受影响）
+unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
+git config --global --unset http.proxy 2>/dev/null || true
+git config --global --unset https.proxy 2>/dev/null || true
