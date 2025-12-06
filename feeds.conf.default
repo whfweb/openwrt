@@ -9,3 +9,5 @@ src-git telephony https://github.com/openwrt/telephony.git
 #src-git small https://github.com/kenzok8/small.git
 #src-git smallpackage https://github.com/kenzok8/small-package.git
 src-git OpenClash https://github.com/whfweb/OpenClash.git
+src-git zerotier https://github.com/mwarning/zerotier-openwrt.git
+
