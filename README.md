@@ -28,6 +28,8 @@ cd openwrt
 
 sudo apt update
 sudo apt install build-essential libncurses5-dev gawk git libssl-dev gettext zlib1g-dev swig unzip time rsync python3 python3-setuptools
+
+   ./scripts/feeds clean
    
    ./scripts/feeds update -a
    
