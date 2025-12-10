@@ -92,52 +92,51 @@ proxies:
   - {"name":"v5-02|美国|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43052,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"US"}
 
 proxy-groups:
-  # ========== 【第一步】修改：🚀 全局默认出口 ==========
+  # 核心优化组1：全局默认出口 (已切换为亚洲可用节点)
   - name: "🚀 全局默认出口"
-    type: select  # 关键修改：从 url-test 改为 select，作为调度中心
+    type: select
     proxies:
-      - "📺 YouTube视频"   # 如果自动跳转过来，就用视频组
-      - "🚀 GitHub下载"   # 如果自动跳转过来，就用下载组
-      - "v5-01|美国|1x"    # 通用后备
-      - "v5-02|美国|1x"
-      - "v5-01|日本|1x"
-      - "DIRECT"
-
-  # ========== 【第一步】修改：📺 YouTube视频 ==========
-  - name: "📺 YouTube视频"
-    type: url-test  # 这个组负责为视频智能选择最快的节点
-    url: "http://www.gstatic.com/generate_204"
-    interval: 300
-    tolerance: 50
-    proxies:
-      - "v5-01|美国|1x"
-      - "v5-02|美国|1x"
+      - "v5-01|香港|1x"
+      - "v5-02|香港|1x"
       - "v5-01|日本|1x"
       - "v5-01|新加坡|1x"
-
-  # ========== 【第一步】修改：🚀 GitHub下载 ==========
-  - name: "🚀 GitHub下载"
-    type: load-balance  # 这个组负责为下载均衡分配多个节点
-    url: 'https://github.com/favicon.ico'
-    interval: 300
-    strategy: round-robin
-    proxies:
       - "v5-01|美国|1x"
       - "v5-02|美国|1x"
+      - "DIRECT"
+
+  # 核心优化组2：YouTube视频 (已切换为亚洲可用节点)
+  - name: "📺 YouTube视频"
+    type: select
+    proxies:
+      - "v5-01|香港|1x"
+      - "v5-02|香港|1x"
+      - "v5-01|日本|1x"
+      - "v5-01|新加坡|1x"
+      - "🚀 全局默认出口"
+      - "DIRECT"
+
+  # 核心优化组3：GitHub下载 (已切换为亚洲可用节点)
+  - name: "🚀 GitHub下载"
+    type: select
+    proxies:
+      - "v5-01|香港|1x"
+      - "v5-02|香港|1x"
       - "v5-01|日本|1x"
       - "v5-02|日本|1x"
       - "v5-01|新加坡|1x"
+      - "🚀 全局默认出口"
+      - "DIRECT"
 
-  # ========== 【第三步】检查：🐟 漏网之鱼 ==========
+  # 兜底组：指向全局默认出口
   - name: "🐟 漏网之鱼"
     type: select
     proxies:
-      - "🚀 全局默认出口"  # 指向我们修改好的调度中心
+      - "🚀 全局默认出口"
       - "🚀 GitHub下载"
       - "🚀 节点选择"
       - "🎯 全球直连"
 
-  # 以下原有组保持不变或微调
+  # 通用选择组
   - name: "🚀 节点选择"
     type: select
     proxies:
@@ -161,17 +160,19 @@ proxy-groups:
       - "v5-01|美国|1x"
       - "v5-02|美国|1x"
 
+  # 自动测试组 (已切换为亚洲可用节点)
   - name: "♻️ 自动选择"
     type: url-test
     url: "http://www.gstatic.com/generate_204"
     interval: 300
     tolerance: 5000
     proxies:
-      - "v5-01|美国|1x"
-      - "v5-02|美国|1x"
-      - "v5-01|日本|1x"
       - "v5-01|香港|1x"
+      - "v5-02|香港|1x"
+      - "v5-01|日本|1x"
+      - "v5-01|新加坡|1x"
 
+  # 国外媒体组
   - name: "🌍 国外媒体"
     type: select
     proxies:
@@ -181,6 +182,7 @@ proxy-groups:
       - "♻️ 自动选择"
       - "🎯 全球直连"
 
+  # 以下为原有功能组
   - name: "📲 电报信息"
     type: select
     proxies:
@@ -228,7 +230,7 @@ rules:
   - "IP-CIDR,127.0.0.0/8,🎯 全球直连,no-resolve"
   - "IP-CIDR,192.168.0.0/16,🎯 全球直连,no-resolve"
 
-  # ========== 【第二步】新增：强制分流规则（放在最前面！）==========
+  # === 核心规则：强制关键服务分流 (优先级最高) ===
   # 1. 强制YouTube视频走专用通道
   - DOMAIN-SUFFIX,googlevideo.com,📺 YouTube视频
   - DOMAIN-KEYWORD,youtubei.googleapis.com,📺 YouTube视频
@@ -243,12 +245,12 @@ rules:
   - DOMAIN-SUFFIX,blob.core.windows.net,🚀 GitHub下载
   - DOMAIN-KEYWORD,github,🚀 GitHub下载
 
-  # 3. 强制Google网页服务走可靠的出口
-  - DOMAIN-SUFFIX,google.com,🚀 全局默认出口
-  - DOMAIN-SUFFIX,googleapis.com,🚀 全局默认出口
-  - DOMAIN-SUFFIX,gstatic.com,🚀 全局默认出口
+  # 3. 强制Google网页服务走可靠的出口 (指向视频组，复用优质节点)
+  - DOMAIN-SUFFIX,google.com,📺 YouTube视频
+  - DOMAIN-SUFFIX,googleapis.com,📺 YouTube视频
+  - DOMAIN-SUFFIX,gstatic.com,📺 YouTube视频
 
-  # ... 你原有的其他规则（保持原样）
+  # 原有其他规则
   - DOMAIN-KEYWORD,microsoft,Ⓜ️ 微软服务
   - "DOMAIN-SUFFIX,apple.com,🍎 苹果服务"
   - "DOMAIN-SUFFIX,t.me,📲 电报信息"
