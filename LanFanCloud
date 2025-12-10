@@ -165,6 +165,17 @@ proxy-groups:
     - v5-01|美国|1x
     - v5-02|美国|1x
 -
+ - name: "🚀 GitHub下载"
+    type: select
+    proxies:
+      - "v5-01|香港|1x"
+      - "v5-02|香港|1x"
+      - "v5-01|日本|1x"
+      - "v5-02|日本|1x"
+      - "v5-01|新加坡|1x"
+      - "🚀 全局默认出口"
+      - "DIRECT"
+-
   name: Netflix
   type: select
   proxies:
