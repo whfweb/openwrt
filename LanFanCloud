@@ -527,6 +527,12 @@ proxy-groups:
   interval: 7200
 
 rules:
+  - DOMAIN-SUFFIX,github.com,🚀 GitHub下载
+  - DOMAIN-SUFFIX,githubusercontent.com,🚀 GitHub下载
+  - DOMAIN-SUFFIX,objects.githubusercontent.com,🚀 GitHub下载
+  - DOMAIN-SUFFIX,raw.githubusercontent.com,🚀 GitHub下载
+  - DOMAIN-SUFFIX,blob.core.windows.net,🚀 GitHub下载
+  - DOMAIN-KEYWORD,github,🚀 GitHub下载
   - DOMAIN-SUFFIX,services.googleapis.cn,LanFanCloud ⛵
   - DOMAIN-SUFFIX,play.googleapis.com,LanFanCloud ⛵
   - DOMAIN-SUFFIX,xn--ngstr-lra8j.com,LanFanCloud ⛵
