@@ -75,7 +75,6 @@ dns:
     - "+.firebaseinstallations.googleapis.com"
     - "+.oauthaccountmanager.googleapis.com"
 
-# ========== 您的节点列表（保持不变） ==========
 proxies:
   - {"name":"v5-01|香港|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43011,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"HK"}
   - {"name":"v5-02|香港|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43012,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"HK"}
@@ -93,47 +92,52 @@ proxies:
   - {"name":"v5-02|美国|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43052,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"US"}
 
 proxy-groups:
-  # 核心修改：所有节点名称已更新为与proxies列表匹配
+  # ========== 【第一步】修改：🚀 全局默认出口 ==========
   - name: "🚀 全局默认出口"
-    type: url-test
-    url: "http://www.google.com/generate_204"
+    type: select  # 关键修改：从 url-test 改为 select，作为调度中心
+    proxies:
+      - "📺 YouTube视频"   # 如果自动跳转过来，就用视频组
+      - "🚀 GitHub下载"   # 如果自动跳转过来，就用下载组
+      - "v5-01|美国|1x"    # 通用后备
+      - "v5-02|美国|1x"
+      - "v5-01|日本|1x"
+      - "DIRECT"
+
+  # ========== 【第一步】修改：📺 YouTube视频 ==========
+  - name: "📺 YouTube视频"
+    type: url-test  # 这个组负责为视频智能选择最快的节点
+    url: "http://www.gstatic.com/generate_204"
     interval: 300
     tolerance: 50
     proxies:
-      - "v5-01|美国|1x"  # 已修正
-      - "v5-02|美国|1x"  # 已修正
-      # 您目前只有2个美国节点，已移除不存在的引用
+      - "v5-01|美国|1x"
+      - "v5-02|美国|1x"
+      - "v5-01|日本|1x"
+      - "v5-01|新加坡|1x"
 
-  - name: "📺 YouTube视频"
-    type: select
-    proxies:
-      - "🚀 全局默认出口"
-      - "v5-01|美国|1x"  # 已修正
-      - "v5-02|美国|1x"  # 已修正
-      - "v5-01|日本|1x"  # 新增：日本节点对YouTube有时也很快
-      - "v5-01|香港|1x"  # 新增：香港节点作为备选
-      - "DIRECT"
-
+  # ========== 【第一步】修改：🚀 GitHub下载 ==========
   - name: "🚀 GitHub下载"
-    type: load-balance
+    type: load-balance  # 这个组负责为下载均衡分配多个节点
     url: 'https://github.com/favicon.ico'
     interval: 300
     strategy: round-robin
     proxies:
-      - "v5-01|美国|1x"  # 已修正
-      - "v5-02|美国|1x"  # 已修正
-      - "v5-01|日本|1x"  # 已修正
-      - "v5-02|日本|1x"  # 已修正
-      - "v5-01|新加坡|1x" # 已修正
+      - "v5-01|美国|1x"
+      - "v5-02|美国|1x"
+      - "v5-01|日本|1x"
+      - "v5-02|日本|1x"
+      - "v5-01|新加坡|1x"
 
+  # ========== 【第三步】检查：🐟 漏网之鱼 ==========
   - name: "🐟 漏网之鱼"
     type: select
     proxies:
-      - "🚀 全局默认出口"  # 关键：让未知流量走可靠的通道
+      - "🚀 全局默认出口"  # 指向我们修改好的调度中心
       - "🚀 GitHub下载"
       - "🚀 节点选择"
       - "🎯 全球直连"
 
+  # 以下原有组保持不变或微调
   - name: "🚀 节点选择"
     type: select
     proxies:
@@ -142,7 +146,6 @@ proxy-groups:
       - "📺 YouTube视频"
       - "🚀 GitHub下载"
       - DIRECT
-      # 您当前的所有节点（按地区分类）
       - "v5-01|香港|1x"
       - "v5-02|香港|1x"
       - "v5-03|香港|1x"
@@ -160,7 +163,7 @@ proxy-groups:
 
   - name: "♻️ 自动选择"
     type: url-test
-    url: "http://www.google.com/generate_204"
+    url: "http://www.gstatic.com/generate_204"
     interval: 300
     tolerance: 5000
     proxies:
@@ -172,13 +175,12 @@ proxy-groups:
   - name: "🌍 国外媒体"
     type: select
     proxies:
-      - "📺 YouTube视频"    # 视频优先走专用通道
-      - "🚀 全局默认出口"   # 其次走优化出口
+      - "📺 YouTube视频"
+      - "🚀 全局默认出口"
       - "🚀 节点选择"
       - "♻️ 自动选择"
       - "🎯 全球直连"
 
-  # 您原有的其他组，已更新节点引用
   - name: "📲 电报信息"
     type: select
     proxies:
@@ -226,32 +228,27 @@ rules:
   - "IP-CIDR,127.0.0.0/8,🎯 全球直连,no-resolve"
   - "IP-CIDR,192.168.0.0/16,🎯 全球直连,no-resolve"
 
-  # === 核心优化：Google服务兜底规则 ===
-  - DOMAIN-SUFFIX,google.com,🚀 全局默认出口
-  - DOMAIN-SUFFIX,googleapis.com,🚀 全局默认出口
-  - DOMAIN-SUFFIX,gstatic.com,🚀 全局默认出口
-  - DOMAIN-SUFFIX,googleusercontent.com,🚀 全局默认出口
-
-  # 1. YouTube & Google 视频服务
+  # ========== 【第二步】新增：强制分流规则（放在最前面！）==========
+  # 1. 强制YouTube视频走专用通道
   - DOMAIN-SUFFIX,googlevideo.com,📺 YouTube视频
   - DOMAIN-KEYWORD,youtubei.googleapis.com,📺 YouTube视频
-  - DOMAIN-KEYWORD,ytimg,📺 YouTube视频
+  - DOMAIN-SUFFIX,ytimg.com,📺 YouTube视频
   - DOMAIN-SUFFIX,youtube.com,📺 YouTube视频
-  - DOMAIN-SUFFIX,ggpht.com,📺 YouTube视频  # 新增：YouTube缩略图域名
 
-  # 2. GitHub及其相关服务
+  # 2. 强制GitHub及下载走专用通道
   - DOMAIN-SUFFIX,github.com,🚀 GitHub下载
-  - DOMAIN-SUFFIX,github.io,🚀 GitHub下载
   - DOMAIN-SUFFIX,githubusercontent.com,🚀 GitHub下载
-  - DOMAIN-SUFFIX,githubassets.com,🚀 GitHub下载
   - DOMAIN-SUFFIX,objects.githubusercontent.com,🚀 GitHub下载
   - DOMAIN-SUFFIX,raw.githubusercontent.com,🚀 GitHub下载
-  - DOMAIN-SUFFIX,codeload.github.com,🚀 GitHub下载
-  - DOMAIN-SUFFIX,api.github.com,🚀 GitHub下载
   - DOMAIN-SUFFIX,blob.core.windows.net,🚀 GitHub下载
   - DOMAIN-KEYWORD,github,🚀 GitHub下载
 
-  # 您原有的其他规则
+  # 3. 强制Google网页服务走可靠的出口
+  - DOMAIN-SUFFIX,google.com,🚀 全局默认出口
+  - DOMAIN-SUFFIX,googleapis.com,🚀 全局默认出口
+  - DOMAIN-SUFFIX,gstatic.com,🚀 全局默认出口
+
+  # ... 你原有的其他规则（保持原样）
   - DOMAIN-KEYWORD,microsoft,Ⓜ️ 微软服务
   - "DOMAIN-SUFFIX,apple.com,🍎 苹果服务"
   - "DOMAIN-SUFFIX,t.me,📲 电报信息"
