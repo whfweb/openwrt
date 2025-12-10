@@ -1,0 +1,274 @@
+---
+mixed-port: 7893
+allow-lan: true
+mode: rule
+log-level: info
+ipv6: true
+external-controller: 0.0.0.0:9090
+
+dns:
+  enable: true
+  listen: 0.0.0.0:7874
+  ipv6: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  
+  default-nameserver:
+    - 223.5.5.5
+    - 114.114.114.114
+  
+  nameserver:
+    - 119.29.29.29
+    - 223.5.5.5
+    - 180.76.76.76
+  
+  fallback:
+    - 'udp://208.67.222.222:443'
+    - 'tls://1.1.1.1:853'
+    - 'tls://8.8.4.4:853'
+    - 'https://dns.cloudflare.com/dns-query'
+    - 'https://dns.google/dns-query'
+  
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+    domain:
+      - '+.google.com'
+      - '+.github.com'
+      - '+.youtube.com'
+  
+  fake-ip-filter:
+    - "*.lan"
+    - "*.localdomain"
+    - "*.example"
+    - "*.invalid"
+    - "*.localhost"
+    - "*.test"
+    - "*.local"
+    - "*.home.arpa"
+    - time.*.com
+    - "*.ntp.org.cn"
+    - "*.cn"
+    - "+.baidu.com"
+    - "+.qq.com"
+    - "+.alicdn.com"
+    - "+.taobao.com"
+    - "+.jd.com"
+    - "*.googlevideo.com"
+    - "*.youtube.com"
+    - "*.ytimg.com"
+    - "*.github.com"
+    - "*.githubusercontent.com"
+    - "*.githubassets.com"
+    - "*.blob.core.windows.net"
+    - "+.google.com"
+    - "+.googleapis.com"
+    - "+.gstatic.com"
+    - "+.googleusercontent.com"
+    - "+.ggpht.com"
+    - "+.googlehosted.com"
+    - "+.google-analytics.com"
+    - "+.youtubei.googleapis.com"
+    - "+.oauth2.googleapis.com"
+    - "+.firebaseinstallations.googleapis.com"
+    - "+.oauthaccountmanager.googleapis.com"
+
+# ========== 您的节点列表（保持不变） ==========
+proxies:
+  - {"name":"v5-01|香港|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43011,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"HK"}
+  - {"name":"v5-02|香港|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43012,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"HK"}
+  - {"name":"v5-03|香港|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43013,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"HK"}
+  - {"name":"v5-04|香港|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43014,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"HK"}
+  - {"name":"v5-01|日本|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43021,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"JP"}
+  - {"name":"v5-02|日本|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43022,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"JP"}
+  - {"name":"v5-03|日本|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43023,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"JP"}
+  - {"name":"v5-04|日本|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43024,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"JP"}
+  - {"name":"v5-01|台湾|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43031,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"TW"}
+  - {"name":"v5-02|台湾|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43032,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"TW"}
+  - {"name":"v5-01|新加坡|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43041,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"SG"}
+  - {"name":"v5-02|新加坡|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43042,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"SG"}
+  - {"name":"v5-01|美国|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43051,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"US"}
+  - {"name":"v5-02|美国|1x","type":"ssr","server":"laf-gd1.vip.cdn.lafserver.cc","port":43052,"cipher":"chacha20-ietf","password":"lanfan-vip","protocol":"auth_aes128_md5","protocol-param":"70655:Cd6Eu8","obfs":"plain","obfs-param":"46e5a70655.cloudfront.com,cloudflare.com,itunes.apple.com,www.icloud.com,ajax.microsoft.com,apps.bdimg.com,www.bing.com","udp":true,"tags":"US"}
+
+proxy-groups:
+  # 核心修改：所有节点名称已更新为与proxies列表匹配
+  - name: "🚀 全局默认出口"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 300
+    tolerance: 50
+    proxies:
+      - "v5-01|美国|1x"  # 已修正
+      - "v5-02|美国|1x"  # 已修正
+      # 您目前只有2个美国节点，已移除不存在的引用
+
+  - name: "📺 YouTube视频"
+    type: select
+    proxies:
+      - "🚀 全局默认出口"
+      - "v5-01|美国|1x"  # 已修正
+      - "v5-02|美国|1x"  # 已修正
+      - "v5-01|日本|1x"  # 新增：日本节点对YouTube有时也很快
+      - "v5-01|香港|1x"  # 新增：香港节点作为备选
+      - "DIRECT"
+
+  - name: "🚀 GitHub下载"
+    type: load-balance
+    url: 'https://github.com/favicon.ico'
+    interval: 300
+    strategy: round-robin
+    proxies:
+      - "v5-01|美国|1x"  # 已修正
+      - "v5-02|美国|1x"  # 已修正
+      - "v5-01|日本|1x"  # 已修正
+      - "v5-02|日本|1x"  # 已修正
+      - "v5-01|新加坡|1x" # 已修正
+
+  - name: "🐟 漏网之鱼"
+    type: select
+    proxies:
+      - "🚀 全局默认出口"  # 关键：让未知流量走可靠的通道
+      - "🚀 GitHub下载"
+      - "🚀 节点选择"
+      - "🎯 全球直连"
+
+  - name: "🚀 节点选择"
+    type: select
+    proxies:
+      - "🚀 全局默认出口"
+      - "♻️ 自动选择"
+      - "📺 YouTube视频"
+      - "🚀 GitHub下载"
+      - DIRECT
+      # 您当前的所有节点（按地区分类）
+      - "v5-01|香港|1x"
+      - "v5-02|香港|1x"
+      - "v5-03|香港|1x"
+      - "v5-04|香港|1x"
+      - "v5-01|日本|1x"
+      - "v5-02|日本|1x"
+      - "v5-03|日本|1x"
+      - "v5-04|日本|1x"
+      - "v5-01|台湾|1x"
+      - "v5-02|台湾|1x"
+      - "v5-01|新加坡|1x"
+      - "v5-02|新加坡|1x"
+      - "v5-01|美国|1x"
+      - "v5-02|美国|1x"
+
+  - name: "♻️ 自动选择"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 300
+    tolerance: 5000
+    proxies:
+      - "v5-01|美国|1x"
+      - "v5-02|美国|1x"
+      - "v5-01|日本|1x"
+      - "v5-01|香港|1x"
+
+  - name: "🌍 国外媒体"
+    type: select
+    proxies:
+      - "📺 YouTube视频"    # 视频优先走专用通道
+      - "🚀 全局默认出口"   # 其次走优化出口
+      - "🚀 节点选择"
+      - "♻️ 自动选择"
+      - "🎯 全球直连"
+
+  # 您原有的其他组，已更新节点引用
+  - name: "📲 电报信息"
+    type: select
+    proxies:
+      - "🚀 节点选择"
+      - "🎯 全球直连"
+      - "v5-01|香港|1x"
+
+  - name: "Ⓜ️ 微软服务"
+    type: select
+    proxies:
+      - "🎯 全球直连"
+      - "🚀 节点选择"
+      - "v5-01|香港|1x"
+
+  - name: "🍎 苹果服务"
+    type: select
+    proxies:
+      - "🚀 节点选择"
+      - "🎯 全球直连"
+      - "v5-01|香港|1x"
+
+  - name: "🎯 全球直连"
+    type: select
+    proxies:
+      - DIRECT
+      - "🚀 节点选择"
+      - "♻️ 自动选择"
+
+  - name: "🛑 全球拦截"
+    type: select
+    proxies:
+      - REJECT
+      - DIRECT
+
+  - name: "🍃 应用净化"
+    type: select
+    proxies:
+      - REJECT
+      - DIRECT
+
+rules:
+  - "DOMAIN-SUFFIX,acl4.ssr,🎯 全球直连"
+  - "DOMAIN-SUFFIX,ip6-localhost,🎯 全球直连"
+  - "DOMAIN-SUFFIX,localhost,🎯 全球直连"
+  - "IP-CIDR,127.0.0.0/8,🎯 全球直连,no-resolve"
+  - "IP-CIDR,192.168.0.0/16,🎯 全球直连,no-resolve"
+
+  # === 核心优化：Google服务兜底规则 ===
+  - DOMAIN-SUFFIX,google.com,🚀 全局默认出口
+  - DOMAIN-SUFFIX,googleapis.com,🚀 全局默认出口
+  - DOMAIN-SUFFIX,gstatic.com,🚀 全局默认出口
+  - DOMAIN-SUFFIX,googleusercontent.com,🚀 全局默认出口
+
+  # 1. YouTube & Google 视频服务
+  - DOMAIN-SUFFIX,googlevideo.com,📺 YouTube视频
+  - DOMAIN-KEYWORD,youtubei.googleapis.com,📺 YouTube视频
+  - DOMAIN-KEYWORD,ytimg,📺 YouTube视频
+  - DOMAIN-SUFFIX,youtube.com,📺 YouTube视频
+  - DOMAIN-SUFFIX,ggpht.com,📺 YouTube视频  # 新增：YouTube缩略图域名
+
+  # 2. GitHub及其相关服务
+  - DOMAIN-SUFFIX,github.com,🚀 GitHub下载
+  - DOMAIN-SUFFIX,github.io,🚀 GitHub下载
+  - DOMAIN-SUFFIX,githubusercontent.com,🚀 GitHub下载
+  - DOMAIN-SUFFIX,githubassets.com,🚀 GitHub下载
+  - DOMAIN-SUFFIX,objects.githubusercontent.com,🚀 GitHub下载
+  - DOMAIN-SUFFIX,raw.githubusercontent.com,🚀 GitHub下载
+  - DOMAIN-SUFFIX,codeload.github.com,🚀 GitHub下载
+  - DOMAIN-SUFFIX,api.github.com,🚀 GitHub下载
+  - DOMAIN-SUFFIX,blob.core.windows.net,🚀 GitHub下载
+  - DOMAIN-KEYWORD,github,🚀 GitHub下载
+
+  # 您原有的其他规则
+  - DOMAIN-KEYWORD,microsoft,Ⓜ️ 微软服务
+  - "DOMAIN-SUFFIX,apple.com,🍎 苹果服务"
+  - "DOMAIN-SUFFIX,t.me,📲 电报信息"
+  
+  - "GEOIP,CN,🎯 全球直连"
+  - "MATCH,🐟 漏网之鱼"
+
+redir-port: 7892
+tproxy-port: 7895
+port: 7890
+socks-port: 7891
+secret: Eq5Aj8mG
+bind-address: "*"
+external-ui: "/usr/share/openclash/ui"
+keep-alive-interval: 15
+keep-alive-idle: 600
+profile:
+  store-selected: true
+authentication:
+  - Clash:3126gbSU
