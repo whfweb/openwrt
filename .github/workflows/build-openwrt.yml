@@ -11,6 +11,7 @@
 name: Build OpenWrt
 
 on:
+  workflow_dispatch:      # 手动触发（显示按钮）
   repository_dispatch:
 #  release:
 #    types: published
