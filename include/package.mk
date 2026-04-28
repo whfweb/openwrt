@@ -61,6 +61,15 @@ ifdef CONFIG_USE_MOLD
   endif
 endif
 
+# loongarch64 sets CONFIG_PAGE_SIZE_16KB, all other targets set CONFIG_PAGE_SIZE_4KB only.
+ifeq ($(ARCH),loongarch64)
+  TARGET_CFLAGS += -Wl,-z,max-page-size=16384
+  TARGET_LDFLAGS += -zmax-page-size=16384
+else
+  TARGET_CFLAGS += -Wl,-z,max-page-size=4096
+  TARGET_LDFLAGS += -zmax-page-size=4096
+endif
+
 include $(INCLUDE_DIR)/hardening.mk
 include $(INCLUDE_DIR)/prereq.mk
 include $(INCLUDE_DIR)/unpack.mk
@@ -332,9 +341,12 @@ define BuildPackage
   $(eval $(Package/Default))
   $(eval $(Package/$(1)))
 
-ifdef DESCRIPTION
-$$(error DESCRIPTION:= is obsolete, use Package/PKG_NAME/description)
-endif
+  # Add an implicit self-provide. apk can't handle self provides, be it
+  # versioned or virtual, so opt for a suffix instead. This allows several
+  # variants to provide the same virtual package without adding extra provides
+  # to the default one, e.g. wget implicitly provides wget-any and is marked as
+  # default, so wget-ssl can explicitly provide @wget-any as well.
+  $(eval PROVIDES:=$(strip @$(1)-any $(PROVIDES)))
 
 ifndef Package/$(1)/description
 define Package/$(1)/description
@@ -388,7 +400,7 @@ prepare-package-install:
 $(PACKAGE_DIR):
 	mkdir -p $@
 
-compile:
+compile: prepare-package-install
 .install: .compile
 install: compile
 
