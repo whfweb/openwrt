@@ -68,6 +68,11 @@ bazis,ax3000wm)
 	ucidef_set_led_netdev "lanlink" "LANLINK" "green:lan" "eth1" "link"
 	ucidef_set_led_netdev "internet" "internet" "blue:wan-online" "wan" "link"
 	;;
+comfast,cf-xr186)
+	ucidef_set_led_netdev "lan" "LAN" "blue:lan" "eth0" "link tx rx"
+	ucidef_set_led_netdev "wlan2g" "WLAN2G" "green:wlan" "phy0-ap0" "link tx rx"
+	ucidef_set_led_netdev "wlan5g" "WLAN5G" "blue:wlan" "phy1-ap0" "link tx rx"
+	;;
 cudy,re3000-v1|\
 kebidumei,ax3000-u22|\
 wavlink,wl-wn573hx3)
@@ -99,6 +104,10 @@ cudy,wbr3000uax-v1-ubootmod)
 	;;
 elecom,wrc-x3000gs3)
 	ucidef_set_led_netdev "wan" "wan" "green:wan" "wan"
+	;;
+elecom,wrc-x6000gsd|\
+elecom,wrc-x6000qs)
+	ucidef_set_led_netdev "wan" "wan" "mdio-bus:05:white:wan" "wan" "link tx rx"
 	;;
 glinet,gl-x3000|\
 glinet,gl-xe3000)

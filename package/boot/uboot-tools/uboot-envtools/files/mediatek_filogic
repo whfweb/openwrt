@@ -46,6 +46,7 @@ netis,nx32u|\
 nokia,ea0326gmp|\
 openwrt,one|\
 qihoo,360t7|\
+qihoo,360t7-ubi|\
 routerich,ax3000-ubootmod|\
 routerich,be7200|\
 snr,snr-cpe-ax2|\
@@ -53,6 +54,7 @@ tplink,tl-xdr4288|\
 tplink,tl-xdr6086|\
 tplink,tl-xdr6088|\
 tplink,tl-xtr8488|\
+wavlink,wl-wnt100x3-ubootmod|\
 xiaomi,mi-router-ax3000t-ubootmod|\
 xiaomi,mi-router-wr30u-ubootmod|\
 xiaomi,redmi-router-ax6000-ubootmod)
@@ -106,6 +108,8 @@ jdcloud,re-cp-03)
 	;;
 buffalo,wsr-3000ax4p|\
 buffalo,wsr-6000ax8|\
+elecom,wrc-x6000gsd|\
+elecom,wrc-x6000qs|\
 mercusys,mr80x-v3|\
 mercusys,mr85x|\
 mercusys,mr90x-v1|\
@@ -129,6 +133,12 @@ gatonetworks,gdsp)
 	;;
 glinet,gl-mt3000)
 	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x80000" "0x20000"
+	;;
+jiorouter,ax6000-jidu6101)
+	. /lib/upgrade/nand.sh
+	envubi=$(nand_find_ubi ubi)
+	envdev=/dev/$(nand_find_volume "$envubi" u-boot-env)
+	ubootenv_add_uci_config "$envdev" "0x0" "0x80000" "0x80000" "1"
 	;;
 openembed,som7981)
 	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x80000" "0x80000"

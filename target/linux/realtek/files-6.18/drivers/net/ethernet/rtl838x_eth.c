@@ -960,18 +960,19 @@ static int rteth_start_xmit(struct sk_buff *skb, struct net_device *netdev)
 		return NETDEV_TX_BUSY;
 	}
 
-	packet->dma = dma_map_single(dev, skb->data, len, DMA_TO_DEVICE);
-	if (unlikely(dma_mapping_error(dev, packet->dma))) {
-		dev_kfree_skb_any(skb);
-		netdev->stats.tx_errors++;
-
-		return NETDEV_TX_OK;
-	}
-
 	if (likely(packet->skb)) {
 		/* cleanup old data of this slot */
 		dma_unmap_single(dev, packet->dma, packet->skb->len, DMA_TO_DEVICE);
 		dev_kfree_skb_any(packet->skb);
+	}
+
+	packet->dma = dma_map_single(dev, skb->data, len, DMA_TO_DEVICE);
+	if (unlikely(dma_mapping_error(dev, packet->dma))) {
+		dev_kfree_skb_any(skb);
+		packet->skb = NULL;
+		netdev->stats.tx_errors++;
+
+		return NETDEV_TX_OK;
 	}
 
 	if (dest_port >= 0)
@@ -1326,14 +1327,14 @@ static const struct rteth_config rteth_838x_cfg = {
 	.qm_pkt2cpu_intpri_map = RTETH_838X_QM_PKT2CPU_INTPRI_MAP,
 	.qm_rsn2cpuqid_ctrl = RTETH_838X_QM_PKT2CPU_INTPRI_0,
 	.qm_rsn2cpuqid_cnt = RTETH_838X_QM_PKT2CPU_INTPRI_CNT,
+	.dma_if_ctrl = RTETH_838X_DMA_IF_CTRL,
 	.dma_if_intr_sts = RTETH_838X_DMA_IF_INTR_STS,
 	.dma_if_intr_msk = RTETH_838X_DMA_IF_INTR_MSK,
 	.dma_if_rx_ring_cntr = RTETH_838X_DMA_IF_RX_RING_CNTR,
 	.dma_if_rx_ring_size = RTETH_838X_DMA_IF_RX_RING_SIZE,
-	.dma_if_ctrl = RTL838X_DMA_IF_CTRL,
+	.dma_rx_base = RTETH_838X_DMA_RX_BASE,
+	.dma_tx_base = RTETH_838X_DMA_TX_BASE,
 	.mac_force_mode_ctrl = RTETH_838X_MAC_FORCE_MODE_CTRL,
-	.dma_rx_base = RTL838X_DMA_RX_BASE,
-	.dma_tx_base = RTL838X_DMA_TX_BASE,
 	.rst_glb_ctrl = RTL838X_RST_GLB_CTRL_0,
 	.mac_reg = { RTETH_838X_MAC_ADDR_CTRL,
 		     RTETH_838X_MAC_ADDR_CTRL_ALE,
@@ -1372,14 +1373,14 @@ static const struct rteth_config rteth_839x_cfg = {
 	.qm_pkt2cpu_intpri_map = RTETH_839X_QM_PKT2CPU_INTPRI_MAP,
 	.qm_rsn2cpuqid_ctrl = RTETH_839X_QM_PKT2CPU_INTPRI_0,
 	.qm_rsn2cpuqid_cnt = RTETH_839X_QM_PKT2CPU_INTPRI_CNT,
+	.dma_if_ctrl = RTETH_839X_DMA_IF_CTRL,
 	.dma_if_intr_sts = RTETH_839X_DMA_IF_INTR_STS,
 	.dma_if_intr_msk = RTETH_839X_DMA_IF_INTR_MSK,
 	.dma_if_rx_ring_cntr = RTETH_839X_DMA_IF_RX_RING_CNTR,
 	.dma_if_rx_ring_size = RTETH_839X_DMA_IF_RX_RING_SIZE,
-	.dma_if_ctrl = RTL839X_DMA_IF_CTRL,
+	.dma_rx_base = RTETH_839X_DMA_RX_BASE,
+	.dma_tx_base = RTETH_839X_DMA_TX_BASE,
 	.mac_force_mode_ctrl = RTETH_839X_MAC_FORCE_MODE_CTRL,
-	.dma_rx_base = RTL839X_DMA_RX_BASE,
-	.dma_tx_base = RTL839X_DMA_TX_BASE,
 	.rst_glb_ctrl = RTL839X_RST_GLB_CTRL,
 	.mac_reg = { RTETH_839X_MAC_ADDR_CTRL },
 	.l2_tbl_flush_ctrl = RTL839X_L2_TBL_FLUSH_CTRL,
@@ -1416,16 +1417,16 @@ static const struct rteth_config rteth_930x_cfg = {
 	.mac_l2_port_ctrl = RTETH_930X_MAC_L2_PORT_CTRL,
 	.qm_rsn2cpuqid_ctrl = RTETH_930X_QM_RSN2CPUQID_CTRL_0,
 	.qm_rsn2cpuqid_cnt = RTETH_930X_QM_RSN2CPUQID_CTRL_CNT,
+	.dma_if_ctrl = RTETH_930X_DMA_IF_CTRL,
 	.dma_if_intr_sts = RTETH_930X_DMA_IF_INTR_STS,
 	.dma_if_intr_msk = RTETH_930X_DMA_IF_INTR_MSK,
 	.dma_if_rx_ring_cntr = RTETH_930X_DMA_IF_RX_RING_CNTR,
 	.dma_if_rx_ring_size = RTETH_930X_DMA_IF_RX_RING_SIZE,
+	.dma_rx_base = RTETH_930X_DMA_RX_BASE,
+	.dma_tx_base = RTETH_930X_DMA_TX_BASE,
 	.l2_ntfy_if_intr_sts = RTL930X_L2_NTFY_IF_INTR_STS,
 	.l2_ntfy_if_intr_msk = RTL930X_L2_NTFY_IF_INTR_MSK,
-	.dma_if_ctrl = RTL930X_DMA_IF_CTRL,
 	.mac_force_mode_ctrl = RTETH_930X_MAC_FORCE_MODE_CTRL,
-	.dma_rx_base = RTL930X_DMA_RX_BASE,
-	.dma_tx_base = RTL930X_DMA_TX_BASE,
 	.rst_glb_ctrl = RTL930X_RST_GLB_CTRL_0,
 	.mac_reg = { RTETH_930X_MAC_L2_ADDR_CTRL },
 	.l2_tbl_flush_ctrl = RTL930X_L2_TBL_FLUSH_CTRL,
@@ -1461,16 +1462,16 @@ static const struct rteth_config rteth_931x_cfg = {
 	.mac_l2_port_ctrl = RTETH_931X_MAC_L2_PORT_CTRL,
 	.qm_rsn2cpuqid_ctrl = RTETH_931X_QM_RSN2CPUQID_CTRL_0,
 	.qm_rsn2cpuqid_cnt = RTETH_931X_QM_RSN2CPUQID_CTRL_CNT,
+	.dma_if_ctrl = RTETH_931X_DMA_IF_CTRL,
 	.dma_if_intr_sts = RTETH_931X_DMA_IF_INTR_STS,
 	.dma_if_intr_msk = RTETH_931X_DMA_IF_INTR_MSK,
 	.dma_if_rx_ring_cntr = RTETH_931X_DMA_IF_RX_RING_CNTR,
 	.dma_if_rx_ring_size = RTETH_931X_DMA_IF_RX_RING_SIZE,
+	.dma_rx_base = RTETH_931X_DMA_RX_BASE,
+	.dma_tx_base = RTETH_931X_DMA_TX_BASE,
 	.l2_ntfy_if_intr_sts = RTL931X_L2_NTFY_IF_INTR_STS,
 	.l2_ntfy_if_intr_msk = RTL931X_L2_NTFY_IF_INTR_MSK,
-	.dma_if_ctrl = RTL931X_DMA_IF_CTRL,
 	.mac_force_mode_ctrl = RTETH_931X_MAC_FORCE_MODE_CTRL,
-	.dma_rx_base = RTL931X_DMA_RX_BASE,
-	.dma_tx_base = RTL931X_DMA_TX_BASE,
 	.rst_glb_ctrl = RTL931X_RST_GLB_CTRL,
 	.mac_reg = { RTETH_930X_MAC_L2_ADDR_CTRL },
 	.l2_tbl_flush_ctrl = RTL931X_L2_TBL_FLUSH_CTRL,
@@ -1498,13 +1499,12 @@ static const struct ethtool_ops rteth_ethtool_ops = {
 
 static int rteth_probe(struct platform_device *pdev)
 {
-	struct net_device *dev;
 	struct device_node *dn = pdev->dev.of_node;
-	struct rteth_ctrl *ctrl;
 	const struct rteth_config *cfg;
-	phy_interface_t phy_mode;
-	struct phylink *phylink;
 	u8 mac_addr[ETH_ALEN] = {0};
+	phy_interface_t phy_mode;
+	struct rteth_ctrl *ctrl;
+	struct net_device *dev;
 	int err = 0;
 
 	pr_info("Probing RTL838X eth device pdev: %x, dev: %x\n",
@@ -1612,10 +1612,6 @@ static int rteth_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, dev);
 
-	err = devm_register_netdev(&pdev->dev, dev);
-	if (err)
-		return err;
-
 	phy_mode = PHY_INTERFACE_MODE_NA;
 	err = of_get_phy_mode(dn, &phy_mode);
 	if (err < 0) {
@@ -1630,14 +1626,16 @@ static int rteth_probe(struct platform_device *pdev)
 
 	__set_bit(PHY_INTERFACE_MODE_INTERNAL, ctrl->phylink_config.supported_interfaces);
 
-	phylink = phylink_create(&ctrl->phylink_config, pdev->dev.fwnode,
-				 phy_mode, &rteth_mac_ops);
+	ctrl->phylink = phylink_create(&ctrl->phylink_config, pdev->dev.fwnode,
+				       phy_mode, &rteth_mac_ops);
+	if (IS_ERR(ctrl->phylink))
+		return PTR_ERR(ctrl->phylink);
 
-	if (IS_ERR(phylink))
-		return PTR_ERR(phylink);
-	ctrl->phylink = phylink;
+	err = devm_register_netdev(&pdev->dev, dev);
+	if (err)
+		phylink_destroy(ctrl->phylink);
 
-	return 0;
+	return err;
 }
 
 static void rteth_remove(struct platform_device *pdev)
